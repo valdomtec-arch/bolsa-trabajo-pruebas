@@ -288,7 +288,14 @@ margin: 6px 0;
 .empresas-table tr td:first-child { border-left: 1px solid var(--border-color); border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
 .empresas-table tr td:last-child { border-right: 1px solid var(--border-color); border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 .empresas-table tr:hover td { background: #1e314b; }
-.empresas-table td img { width: 42px; height: 42px; object-fit: contain; border-radius: 6px; background: white; padding: 2px;} 
+.empresas-table td img { 
+  width: 42px; 
+  height: 42px; 
+  object-fit: contain; 
+  border-radius: 6px; 
+  background: white; 
+  padding: 2px;
+}
 
 .selector-puestos-verde { 
 background: #112d24; 
@@ -516,12 +523,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 <div class="admin-container"> 
   <h1><i class="fas fa-sliders-h"></i> Panel de Administración Global</h1> 
 
-  <!-- CONFIGURACIÓN API KEY -->
-  <div class="ia-box" style="margin-bottom: 15px; background: rgba(255, 102, 0, 0.03); border-color: var(--border-color);">
-    <label style="color:var(--primary-orange);font-weight:bold;display:block;margin-bottom:5px;"><i class="fas fa-key"></i> Configuración de API Key (Gemini)</label>
-    <input type="password" id="geminiApiKeyInput" placeholder="Pega aquí tu clave API de Gemini...">
-  </div>
-
   <!-- MÓDULO 2: MENÚ DE NAVEGACIÓN GLOBAL (TABS) -->
   <div class="tabs-menu"> 
     <button class="tab-btn active" data-tab="tabPrincipal"><i class="fas fa-building"></i> 1. Registrar Empresa</button> 
@@ -532,161 +533,151 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     <button class="tab-btn" data-tab="tabSistemaLogs"><i class="fas fa-terminal"></i> 6. Log del Sistema</button>
   </div>
 
- <!-- ============================================================
-     PESTAÑA 1 REDISEÑADA: API KEY + GESTIÓN DE EMPRESAS PREMIUM
-     VERSIÓN CORREGIDA 1.1 · SIN ERRORES
-     ============================================================ -->
-<div id="tabPrincipal" class="tab-content active">
-
-  <!-- 🔑 SECCIÓN 1: API KEY MAESTRA (CONTROL DE TODO EL SITIO) -->
-  <div class="form-admin" style="border-left: 4px solid var(--primary-orange); margin-bottom: 28px;">
-    <div class="section-divider" style="margin-top:0; border:none; padding:0;">
-      <i class="fas fa-key"></i> CONFIGURACIÓN PRINCIPAL · API KEY GEMINI (MAESTRA)
-    </div>
-    <p style="grid-column:1/-1; color:var(--text-muted); font-size:0.88rem; margin:-8px 0 12px 0;">
-      ⚠️ Esta clave controla <strong style="color:var(--primary-orange)">TODA la operación del sistema</strong>, IA, conexiones y permisos. Guárdala en lugar seguro.
-    </p>
-    
-    <div class="form-group" style="grid-column: 1 / -1;">
-      <label for="geminiApiKeyInput"><i class="fas fa-shield-halved"></i> Clave API de Google Gemini</label>
-      <div style="position:relative;">
-        <input type="password" id="geminiApiKeyInput" placeholder="Pega aquí tu API Key: AIzaSy..." 
-               style="padding-right: 110px; font-family: 'Courier New', monospace; letter-spacing: 0.5px;">
-        <button type="button" id="toggleApiKey" 
-                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); 
-                       background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px 10px;">
-          <i class="fas fa-eye"></i>
-        </button>
+  <!-- PESTAÑA 1 -->
+  <div id="tabPrincipal" class="tab-content active">
+    <!-- 🔑 SECCIÓN 1: API KEY MAESTRA -->
+    <div class="form-admin" style="border-left: 4px solid var(--primary-orange); margin-bottom: 28px;">
+      <div class="section-divider" style="margin-top:0; border:none; padding:0;">
+        <i class="fas fa-key"></i> CONFIGURACIÓN PRINCIPAL · API KEY GEMINI (MAESTRA)
       </div>
-    </div>
-
-    <div style="grid-column:1/-1; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-      <button type="button" id="btnConectarApiKey" class="btn-add" style="max-width:260px;">
-        <i class="fas fa-plug"></i> Conectar / Guardar Clave
-      </button>
-      <button type="button" id="btnProbarConexion" class="btn-update-final" style="max-width:260px;">
-        <i class="fas fa-satellite-dish"></i> Probar Conexión Firebase
-      </button>
-      <span id="estadoConexionApi" style="font-size:0.85rem; color:var(--text-muted);">
-        <i class="fas fa-circle" style="color:#64748b; font-size:0.6rem;"></i> Sin conectar
-      </span>
-    </div>
-  </div>
-
-  <!-- 🏢 SECCIÓN 2: GESTIÓN DE EMPRESAS (FORMULARIO 2 COLUMNAS) -->
-  <div class="form-admin" style="border-left: 4px solid var(--blue-update);">
-    <div class="section-divider" style="margin-top:0; border:none; padding:0; color:var(--blue-update);">
-      <i class="fas fa-building"></i> GESTIÓN DE EMPRESAS · ALTA / EDICIÓN / BAJA
-    </div>
-
-    <!-- COLUMNA IZQUIERDA: DATOS PRINCIPALES -->
-    <div class="form-group">
-      <label for="empIdInput"><i class="fas fa-fingerprint"></i> ID Único de Empresa *</label>
-      <input type="text" id="empIdInput" placeholder="Ej: GLOVISCC, SORIANA, ARCOIRIS" 
-             style="text-transform:uppercase; font-weight:600;">
-    </div>
-
-    <div class="form-group">
-      <label for="empNombreInput"><i class="fas fa-signature"></i> Nombre Comercial *</label>
-      <input type="text" id="empNombreInput" placeholder="Ej: Hyundai Glovis Consolidation Center">
-    </div>
-
-    <div class="form-group">
-      <label for="empTagsInput"><i class="fas fa-tags"></i> Etiquetas / TAG</label>
-      <input type="text" id="empTagsInput" placeholder="Ej: Manufactura, Logística, Tlajomulco, Noche">
-    </div>
-
-    <div class="form-group">
-      <label for="empUbicacionInput"><i class="fas fa-location-dot"></i> Ubicación Base *</label>
-      <input type="text" id="empUbicacionInput" placeholder="Ej: Tlajomulco - Guadalajara, Jalisco">
-    </div>
-
-    <div class="form-group" style="grid-column: 1 / -1;">
-      <label for="empLogoInput"><i class="fas fa-image"></i> URL del Logo Corporativo</label>
-      <input type="url" id="empLogoInput" placeholder="https://ejemplo.com/logo-empresa.png">
-    </div>
-
-    <!-- ENLACE GITHUB AUTO-GENERADO (NO EDITABLE, SOLO LECTURA + COPIAR) -->
-    <div class="form-group full-width" style="background: #051612; border:1px dashed var(--green-success); 
-                                               border-radius:10px; padding:14px; margin-top:6px;">
-      <label style="color:var(--green-success);"><i class="fab fa-github"></i> Enlace Público de Vacantes (AUTO-GENERADO)</label>
-      <div style="display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap;">
-        <code id="empLinkGithub" 
-              style="flex:1; min-width:280px; background:#020617; color:#34d399; padding:12px 14px; 
-                     border-radius:8px; font-size:0.85rem; word-break:break-all; border:1px solid #0f3d2e;">
-          https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=<span id="idEmpresaSpan" style="color:var(--primary-orange); font-weight:bold;">{ID_EMPRESA}</span>
-        </code>
-        <button type="button" id="btnCopiarLink" class="btn-ia" 
-                style="background:var(--green-success); margin:0; white-space:nowrap;">
-          <i class="fas fa-copy"></i> Copiar
-        </button>
-        <a id="btnAbrirLink" href="#" target="_blank" class="btn-wa-premium" 
-           style="background:#0ea5e9; box-shadow:0 0 10px rgba(14,165,233,0.4); text-decoration:none;">
-          <i class="fas fa-external-link-alt"></i> Abrir
-        </a>
-      </div>
-      <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
-        ✅ Este enlace se <strong>actualiza SOLO</strong> con el ID de empresa que escribas arriba. Es el link público que compartes.
+      <p style="grid-column:1/-1; color:var(--text-muted); font-size:0.88rem; margin:-8px 0 12px 0;">
+        ⚠️ Esta clave controla <strong style="color:var(--primary-orange)">TODA la operación del sistema</strong>, IA, conexiones y permisos. Guárdala en lugar seguro.
       </p>
+      
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label for="geminiApiKeyInput"><i class="fas fa-shield-halved"></i> Clave API de Google Gemini</label>
+        <div style="position:relative;">
+          <input type="password" id="geminiApiKeyInput" placeholder="Pega aquí tu API Key: AIzaSy..." 
+                 style="padding-right: 110px; font-family: 'Courier New', monospace; letter-spacing: 0.5px;">
+          <button type="button" id="toggleApiKey" 
+                  style="position:absolute; right:8px; top:50%; transform:translateY(-50%); 
+                         background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px 10px;">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div style="grid-column:1/-1; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <button type="button" id="btnConectarApiKey" class="btn-add" style="max-width:260px;">
+          <i class="fas fa-plug"></i> Conectar / Guardar Clave
+        </button>
+        <button type="button" id="btnProbarConexion" class="btn-update-final" style="max-width:260px;">
+          <i class="fas fa-satellite-dish"></i> Probar Conexión Firebase
+        </button>
+        <span id="estadoConexionApi" style="font-size:0.85rem; color:var(--text-muted);">
+          <i class="fas fa-circle" style="color:#64748b; font-size:0.6rem;"></i> Sin conectar
+        </span>
+      </div>
     </div>
 
-    <!-- BOTONES DE ACCIÓN: 3 NORMALES + 2 DE EDICIÓN (OCULTOS) -->
-    <div class="dual-buttons-layout" id="layoutBotonesEmpresa" style="grid-template-columns: repeat(3, 1fr); margin-top:14px;">
-      <!-- MODO NUEVA EMPRESA -->
-      <button type="button" id="btnGuardarEmpresa" class="btn-add">
-        <i class="fas fa-cloud-upload-alt"></i> Guardar Empresa
-      </button>
-      <button type="button" id="btnLimpiarFormEmpresa" class="btn-update-final">
-        <i class="fas fa-eraser"></i> Limpiar Formulario
-      </button>
-      <button type="button" id="btnBorrarIdEmpresa" class="btn-delete-mode">
-        <i class="fas fa-trash-alt"></i> Borrar / Eliminar ID
-      </button>
-      <!-- MODO EDICIÓN (OCULTOS POR DEFECTO) -->
-      <button type="button" id="btnActualizarEmpresa" class="btn-update-final" style="display:none; background:#10b981;">
-        <i class="fas fa-sync-alt"></i> Guardar Cambios
-      </button>
-      <button type="button" id="btnCancelarEdicionEmpresa" class="btn-delete-mode" style="display:none;">
-        <i class="fas fa-times"></i> Cancelar Edición
-      </button>
+    <!-- 🏢 SECCIÓN 2: GESTIÓN DE EMPRESAS -->
+    <div class="form-admin" style="border-left: 4px solid var(--blue-update);">
+      <div class="section-divider" style="margin-top:0; border:none; padding:0; color:var(--blue-update);">
+        <i class="fas fa-building"></i> GESTIÓN DE EMPRESAS · ALTA / EDICIÓN / BAJA
+      </div>
+
+      <div class="form-group">
+        <label for="empIdInput"><i class="fas fa-fingerprint"></i> ID Único de Empresa *</label>
+        <input type="text" id="empIdInput" placeholder="Ej: GLOVISCC, SORIANA, ARCOIRIS" 
+               style="text-transform:uppercase; font-weight:600;">
+      </div>
+
+      <div class="form-group">
+        <label for="empNombreInput"><i class="fas fa-signature"></i> Nombre Comercial *</label>
+        <input type="text" id="empNombreInput" placeholder="Ej: Hyundai Glovis Consolidation Center">
+      </div>
+
+      <div class="form-group">
+        <label for="empTagsInput"><i class="fas fa-tags"></i> Etiquetas / TAG</label>
+        <input type="text" id="empTagsInput" placeholder="Ej: Manufactura, Logística, Tlajomulco, Noche">
+      </div>
+
+      <div class="form-group">
+        <label for="empUbicacionInput"><i class="fas fa-location-dot"></i> Ubicación Base *</label>
+        <input type="text" id="empUbicacionInput" placeholder="Ej: Tlajomulco - Guadalajara, Jalisco">
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label for="empLogoInput"><i class="fas fa-image"></i> URL del Logo Corporativo</label>
+        <input type="url" id="empLogoInput" placeholder="https://ejemplo.com/logo-empresa.png">
+      </div>
+
+      <!-- ENLACE GITHUB AUTO-GENERADO -->
+      <div class="form-group full-width" style="background: #051612; border:1px dashed var(--green-success); 
+                                                 border-radius:10px; padding:14px; margin-top:6px;">
+        <label style="color:var(--green-success);"><i class="fab fa-github"></i> Enlace Público de Vacantes (AUTO-GENERADO)</label>
+        <div style="display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap;">
+          <code id="empLinkGithub" 
+                style="flex:1; min-width:280px; background:#020617; color:#34d399; padding:12px 14px; 
+                       border-radius:8px; font-size:0.85rem; word-break:break-all; border:1px solid #0f3d2e;">
+            https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=<span id="idEmpresaSpan" style="color:var(--primary-orange); font-weight:bold;">{ID_EMPRESA}</span>
+          </code>
+          <button type="button" id="btnCopiarLink" class="btn-ia" 
+                  style="background:var(--green-success); margin:0; white-space:nowrap;">
+            <i class="fas fa-copy"></i> Copiar
+          </button>
+          <a id="btnAbrirLink" href="#" target="_blank" class="btn-wa-premium" 
+             style="background:#0ea5e9; box-shadow:0 0 10px rgba(14,165,233,0.4); text-decoration:none;">
+            <i class="fas fa-external-link-alt"></i> Abrir
+          </a>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+          ✅ Este enlace se <strong>actualiza SOLO</strong> con el ID de empresa que escribas arriba. Es el link público que compartes.
+        </p>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN -->
+      <div class="dual-buttons-layout" id="layoutBotonesEmpresa" style="grid-template-columns: repeat(3, 1fr); margin-top:14px;">
+        <button type="button" id="btnGuardarEmpresa" class="btn-add">
+          <i class="fas fa-cloud-upload-alt"></i> Guardar Empresa
+        </button>
+        <button type="button" id="btnLimpiarFormEmpresa" class="btn-update-final">
+          <i class="fas fa-eraser"></i> Limpiar Formulario
+        </button>
+        <button type="button" id="btnBorrarIdEmpresa" class="btn-delete-mode">
+          <i class="fas fa-trash-alt"></i> Borrar / Eliminar ID
+        </button>
+        <button type="button" id="btnActualizarEmpresa" class="btn-update-final" style="display:none; background:#10b981;">
+          <i class="fas fa-sync-alt"></i> Guardar Cambios
+        </button>
+        <button type="button" id="btnCancelarEdicionEmpresa" class="btn-delete-mode" style="display:none;">
+          <i class="fas fa-times"></i> Cancelar Edición
+        </button>
+      </div>
+    </div>
+
+    <!-- BUSCADOR + TABLA -->
+    <div style="margin-top:28px;">
+      <div class="search-container">
+        <i class="fas fa-search" style="color: var(--text-muted);"></i>
+        <input type="text" id="buscarEmpresaInput" placeholder="Buscar empresa por ID, Nombre, Tags o Ubicación...">
+        <span style="color:var(--text-muted); font-size:0.8rem; white-space:nowrap;">
+          <i class="fas fa-building"></i> <span id="contadorEmpresas">0</span> registradas
+        </span>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="empresas-table" id="tablaEmpresas">
+          <thead>
+            <tr>
+              <th style="width:70px;">Logo</th>
+              <th>ID</th>
+              <th>Nombre Comercial</th>
+              <th>Ubicación</th>
+              <th>Tags</th>
+              <th style="width:100px;">Enlace</th>
+              <th style="width:140px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyEmpresas"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- 🔎 BUSCADOR + TABLA DE EMPRESAS REGISTRADAS -->
-  <div style="margin-top:28px;">
-    <div class="search-container">
-      <i class="fas fa-search" style="color: var(--text-muted);"></i>
-      <input type="text" id="buscarEmpresaInput" placeholder="Buscar empresa por ID, Nombre, Tags o Ubicación...">
-      <span style="color:var(--text-muted); font-size:0.8rem; white-space:nowrap;">
-        <i class="fas fa-building"></i> <span id="contadorEmpresas">0</span> registradas
-      </span>
-    </div>
-
-    <div style="overflow-x: auto;">
-      <table class="empresas-table" id="tablaEmpresas">
-        <thead>
-          <tr>
-            <th style="width:70px;">Logo</th>
-            <th>ID</th>
-            <th>Nombre Comercial</th>
-            <th>Ubicación</th>
-            <th>Tags</th>
-            <th style="width:100px;">Enlace</th>
-            <th style="width:140px;">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyEmpresas"></tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-<!-- FIN PESTAÑA 1 CORREGIDA -->
-
-  <!-- PESTAÑA 2 - CONTROL DE VACANTES E IA -->
+  <!-- PESTAÑA 2 -->
   <div id="tabSecundarias" class="tab-content"> 
     <div class="tab2-grid-layout">
-      
       <div class="sticky-column">
         <div class="form-admin" style="margin-bottom: 0;">
           <div class="section-divider" style="margin-top:0;"><i class="fas fa-bullseye"></i> Configuración de Destino</div> 
@@ -715,18 +706,17 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
         <div id="accordionIaContent" class="accordion-content">
           <div class="ia-box" style="margin-bottom:0;">
-            
             <label style="color:var(--purple-ia); font-weight:bold; display:block; margin-bottom:8px;"><i class="fas fa-bezier-curve"></i> SELECCIONA EL MOTOR REQUERIDO</label>
             <div style="display: flex; gap: 8px; margin-bottom: 15px; background: #130d22; padding: 6px; border-radius: 8px; border: 1px solid var(--purple-ia);">
               <button type="button" class="tab-btn active" style="padding: 8px 10px; font-size: 0.8rem; margin:0;" id="btnMotorVacantes"><i class="fas fa-briefcase"></i> 1. Extraer Perfil</button>
               <button type="button" class="tab-btn" style="padding: 8px 10px; font-size: 0.8rem; margin:0;" id="btnMotorLogistica"><i class="fas fa-bus"></i> 2. Extraer Logística/Rutas</button>
             </div>
 
-            <label style="color:var(--purple-ia); font-weight:bold; display:block; margin-bottom:8px;"><i class="fas fa-bolt"></i> PROCESAR DOCUMENTO O IMAGEN (TXT, JPG, PNG, PDF, DOCX)</label>
+            <label style="color:var(--purple-ia); font-weight:bold; display:block; margin-bottom:8px;"><i class="fas fa-bolt"></i> PROCESAR DOCUMENTO O IMAGEN</label>
             
             <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
               <div class="file-input-wrapper">
-                <div class="btn-file-custom" style="padding:8px 14px; font-size:0.85rem; background: var(--purple-ia);"><i class="fas fa-upload"></i> Subir Archivo / Ruta</div>
+                <div class="btn-file-custom" style="padding:8px 14px; font-size:0.85rem; background: var(--purple-ia);"><i class="fas fa-upload"></i> Subir Archivo</div>
                 <input type="file" id="archivoIaInput" accept=".txt,.jpg,.jpeg,.png,.pdf,.docx">
               </div>
               <span id="nombreArchivoCargado" style="font-size:.8rem; color:var(--primary-orange); font-weight:600; word-break:break-all;">Ninguno</span>
@@ -739,10 +729,10 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
               <div class="preview-card-view">
                 <span style="font-size:0.9rem; font-weight:bold; color:white; display:block;" id="lblPreviewNombre">Nombre Vacante / Ruta</span>
                 <div class="preview-grid-mini">
-                  <div class="preview-mini-item"><strong>Salario / Datos</strong><span id="lblPreviewSalario">—</span></div>
-                  <div class="preview-mini-item"><strong>Edad / Requisitos</strong><span id="lblPreviewEdad">—</span></div>
-                  <div class="preview-mini-item"><strong>Lugar / Cobertura</strong><span id="lblPreviewLugar">—</span></div>
-                  <div class="preview-mini-item"><strong>Turnos / Horarios</strong><span id="lblPreviewTurnos">—</span></div>
+                  <div class="preview-mini-item"><strong>Salario</strong><span id="lblPreviewSalario">—</span></div>
+                  <div class="preview-mini-item"><strong>Edad</strong><span id="lblPreviewEdad">—</span></div>
+                  <div class="preview-mini-item"><strong>Lugar</strong><span id="lblPreviewLugar">—</span></div>
+                  <div class="preview-mini-item"><strong>Turnos</strong><span id="lblPreviewTurnos">—</span></div>
                 </div>
               </div>
 
@@ -750,11 +740,11 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
               
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:5px;">
                 <button class="btn-ia" id="btnTransferirEspacio" style="background:var(--purple-ia); margin-top:0; font-size:0.8rem; padding:8px;"><i class="fas fa-arrow-down"></i> Copiar Abajo</button>
-                <button class="btn-ia" id="btnSubirLoteMasivo" style="background:var(--green-success); margin-top:0; font-size:0.8rem; padding:8px;"><i class="fas fa-cloud-upload-alt"></i> Guardar/Mezclar Lote</button>
+                <button class="btn-ia" id="btnSubirLoteMasivo" style="background:var(--green-success); margin-top:0; font-size:0.8rem; padding:8px;"><i class="fas fa-cloud-upload-alt"></i> Guardar Lote</button>
               </div>
             </div>
 
-            <textarea id="iaTextoPegar" placeholder="Pega aquí el JSON, texto bruto de WhatsApp o detalles de rutas de transporte..." style="width:100%; min-height:90px; margin-top:10px; border-color:var(--purple-ia); background:#1a1033; color:#e9d5ff; border-radius:6px; padding:10px; outline:none; font-size:0.85rem;"></textarea>
+            <textarea id="iaTextoPegar" placeholder="Pega aquí el JSON..." style="width:100%; min-height:90px; margin-top:10px; border-color:var(--purple-ia); background:#1a1033; color:#e9d5ff; border-radius:6px; padding:10px; outline:none; font-size:0.85rem;"></textarea>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn-ia" id="btnInterpretarIa" style="width:100%;"><i class="fas fa-wand-magic-sparkles"></i> Autorellenar Formulario</button>
             </div>
@@ -762,34 +752,34 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA: FORMULARIO LINEAL -->
+      <!-- FORMULARIO LINEAL (DERECHA) -->
       <div>
         <div class="form-admin" style="margin-bottom:0;">
           <div class="section-divider" style="margin-top:0;"><i class="fas fa-id-badge"></i> Identificación del Puesto</div>
           
-          <div class="form-group"><label for="secPuestoId">ID Clave Vacante (Clave URL):</label><input type="text" id="secPuestoId" placeholder="Ej: ayudante-general"></div>
-          <div class="form-group"><label for="secEstatus">Estatus de Publicación:</label><select id="secEstatus"><option value="disponible">✅ Activa (Visible)</option><option value="no_disponible">❌ Pausada (Oculta)</option></select></div>
-          <div class="form-group full-width"><label for="secBannerUrl">URL Imagen Publicitaria (Banner Interno):</label><input type="url" id="secBannerUrl" placeholder="https://..."></div>
+          <div class="form-group"><label for="secPuestoId">ID Clave Vacante:</label><input type="text" id="secPuestoId" placeholder="Ej: ayudante-general"></div>
+          <div class="form-group"><label for="secEstatus">Estatus:</label><select id="secEstatus"><option value="disponible">✅ Activa</option><option value="no_disponible">❌ Pausada</option></select></div>
+          <div class="form-group full-width"><label for="secBannerUrl">URL Imagen Publicitaria:</label><input type="url" id="secBannerUrl" placeholder="https://..."></div>
           
-          <div class="sub-section-title"><i class="fas fa-user-graduate"></i> Requisitos del Perfil</div>
-          <div class="form-group"><label for="secVacanteNombre">Nombre Oficial de la Vacante:</label><input type="text" id="secVacanteNombre" placeholder="Ej: Montacarguista"></div>
-          <div class="form-group"><label for="secEdad">Rango de Edad:</label><input type="text" id="secEdad" placeholder="Ej: 18 a 50 años"></div>
-          <div class="form-group"><label for="secSexo">Género Solicitado:</label><select id="secSexo"><option>Indistinto</option><option>Masculino</option><option>Femenino</option></select></div>
-          <div class="form-group"><label for="secExperiencia">Experiencia Requerida:</label><input type="text" id="secExperiencia" placeholder="Ej: Sin Experiencia / 6 Meses"></div>
-          <div class="form-group"><label for="secEscolaridad">Escolaridad Mínima:</label><input type="text" id="secEscolaridad" placeholder="Ej: Secundaria"></div>
+          <div class="sub-section-title"><i class="fas fa-user-graduate"></i> Requisitos</div>
+          <div class="form-group"><label for="secVacanteNombre">Nombre Oficial:</label><input type="text" id="secVacanteNombre" placeholder="Ej: Montacarguista"></div>
+          <div class="form-group"><label for="secEdad">Edad:</label><input type="text" id="secEdad" placeholder="Ej: 18 a 50 años"></div>
+          <div class="form-group"><label for="secSexo">Género:</label><select id="secSexo"><option>Indistinto</option><option>Masculino</option><option>Femenino</option></select></div>
+          <div class="form-group"><label for="secExperiencia">Experiencia:</label><input type="text" id="secExperiencia" placeholder="Ej: Sin Experiencia"></div>
+          <div class="form-group"><label for="secEscolaridad">Escolaridad:</label><input type="text" id="secEscolaridad" placeholder="Ej: Secundaria"></div>
           
-          <div class="sub-section-title"><i class="fas fa-hand-holding-dollar"></i> Condiciones & Ubicación</div>
-          <div class="form-group"><label for="secSalario">Salario Neto Ofrecido:</label><input type="text" id="secSalario" placeholder="Ej: $2,400 semanal"></div>
-          <div class="form-group"><label for="secLugarOrigen">Zona Laboral / Planta:</label><input type="text" id="secLugarOrigen" placeholder="Ej: Ciénega de Flores, N.L."></div>
-          <div class="form-group"><label for="secTurnos">Turnos / Jornada:</label><input type="text" id="secTurnos" placeholder="Ej: Rolados de 8 hrs o Fijo de Noche"></div>
+          <div class="sub-section-title"><i class="fas fa-hand-holding-dollar"></i> Condiciones</div>
+          <div class="form-group"><label for="secSalario">Salario:</label><input type="text" id="secSalario" placeholder="Ej: $2,400 semanal"></div>
+          <div class="form-group"><label for="secLugarOrigen">Zona Laboral:</label><input type="text" id="secLugarOrigen" placeholder="Ej: Ciénega de Flores, N.L."></div>
+          <div class="form-group"><label for="secTurnos">Turnos:</label><input type="text" id="secTurnos" placeholder="Ej: 8 hrs"></div>
           
-          <div class="sub-section-title"><i class="fas fa-bus"></i> Logística y Transporte Especializado</div>
-          <div class="form-group full-width"><label for="secRutasTransporte">Rutas de Transporte Autorizadas (Detalle de Paradas):</label><textarea id="secRutasTransporte" placeholder="Especifica las rutas de transporte de personal o las paradas extraídas por la IA..."></textarea></div>
+          <div class="sub-section-title"><i class="fas fa-bus"></i> Transporte</div>
+          <div class="form-group full-width"><label for="secRutasTransporte">Rutas de Transporte:</label><textarea id="secRutasTransporte" placeholder="Rutas..."></textarea></div>
 
-          <div class="sub-section-title"><i class="fas fa-align-left"></i> Contenido Descriptivo</div>
-          <div class="form-group full-width"><label for="secActividades">🛠️ Actividades Principales:</label><textarea id="secActividades" placeholder="Describe brevemente las tareas..."></textarea></div>
-          <div class="form-group full-width"><label for="secBeneficios">🎁 Prestaciones y Beneficios Extra:</label><textarea id="secBeneficios" placeholder="Vales, bono de puntualidad, fondo de ahorro..."></textarea></div>
-          <div class="form-group full-width"><label for="secInfoGeneral">⚠️ Notas Internas / Datos de Contacto:</label><textarea id="secInfoGeneral" placeholder="Uso exclusivo interno o notas especiales..."></textarea></div>
+          <div class="sub-section-title"><i class="fas fa-align-left"></i> Contenido</div>
+          <div class="form-group full-width"><label for="secActividades">Actividades:</label><textarea id="secActividades"></textarea></div>
+          <div class="form-group full-width"><label for="secBeneficios">Prestaciones:</label><textarea id="secBeneficios"></textarea></div>
+          <div class="form-group full-width"><label for="secInfoGeneral">Notas:</label><textarea id="secInfoGeneral"></textarea></div>
 
           <div class="final-actions-grid">
             <button type="button" class="btn-add" id="btnGuardarNuevaVacante"><i class="fas fa-cloud-upload-alt"></i> Publicar Vacante</button>
@@ -797,11 +787,10 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- PESTAÑA 3 - AGENDA Y CANDIDATOS -->
+  <!-- PESTAÑA 3 -->
   <div id="tabRegistros" class="tab-content">
     <div class="metrics-layout">
       <div class="metric-card">
@@ -824,14 +813,14 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
     <!-- Gráficos analíticos de Demanda Real -->
     <div class="charts-grid" style="margin-bottom: 25px;">
-        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); flex: 1;">
             <h3 style="margin-top:0; font-size: 16px; color: var(--primary-orange);"><i class="fas fa-building"></i> Top Empresas con Más Postulados</h3>
             <div style="position: relative; height: 280px;">
                 <canvas id="chartEmpresasReales"></canvas>
             </div>
         </div>
 
-        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); flex: 1;">
             <h3 style="margin-top:0; font-size: 16px; color: var(--primary-orange);"><i class="fas fa-briefcase"></i> Demanda Real por Vacante</h3>
             <div style="position: relative; height: 280px;">
                 <canvas id="chartVacantesReales"></canvas>
@@ -839,11 +828,10 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         </div>
     </div>
 
-    <!-- Agenda de Entrevistas Semanal -->
+    <!-- Agenda -->
     <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 20px;">
-      <div class="section-divider" style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Agenda de Entrevistas Semanal & Filtros Rápidos</div>
-      
-      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;" class="agenda-bar">
+      <div class="section-divider" style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Agenda & Filtros Rápidos</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;">
         <button type="button" class="tab-btn" style="flex:1;" id="btnAgendaTodos" onclick="window.filtrarAgendaPorEstatus('TODOS')"><i class="fas fa-border-all"></i> Todos</button>
         <button type="button" class="tab-btn" style="flex:1;" id="btnAgendaLunes" onclick="window.filtrarAgendaPorEstatus('Lunes')">Lunes</button>
         <button type="button" class="tab-btn" style="flex:1;" id="btnAgendaMartes" onclick="window.filtrarAgendaPorEstatus('Martes')">Martes</button>
@@ -852,33 +840,30 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         <button type="button" class="tab-btn" style="flex:1;" id="btnAgendaViernes" onclick="window.filtrarAgendaPorEstatus('Viernes')">Viernes</button>
         <button type="button" class="tab-btn" style="flex:1;" id="btnAgendaSabado" onclick="window.filtrarAgendaPorEstatus('Sábado')">Sábado</button>
       </div>
-
       <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn-ia" style="background: var(--green-whatsapp); margin-top:0;" id="btnRecordatoriosMasivos"><i class="fab fa-whatsapp"></i> Generar Recordatorios</button>
-          <button type="button" class="btn-ia" style="background: #1e293b; border: 1px solid var(--border-color); color: white; margin-top:0;" id="btnExportarExcelMasivo"><i class="fas fa-file-excel" style="color:#10b981;"></i> Exportar a Excel</button>
+          <button type="button" class="btn-ia" style="background: var(--green-whatsapp); margin-top:0;" id="btnRecordatoriosMasivos"><i class="fab fa-whatsapp"></i> Recordatorios</button>
+          <button type="button" class="btn-ia" style="background: #1e293b; border: 1px solid var(--border-color); color: white; margin-top:0;" id="btnExportarExcelMasivo"><i class="fas fa-file-excel" style="color:#10b981;"></i> Excel</button>
         </div>
-        <span id="lblFiltroAgendaActivo" style="font-size:0.85rem; color:var(--primary-orange); font-weight:bold;">Mostrando: Todos los postulantes</span>
+        <span id="lblFiltroAgendaActivo" style="font-size:0.85rem; color:var(--primary-orange); font-weight:bold;">Mostrando: Todos</span>
       </div>
     </div>
 
-    <!-- Panel de edición de Candidato -->
+    <!-- Panel de edición -->
     <div class="postulante-edit-container" id="panelEdicionPostulante">
-      <div class="section-divider" style="margin-top:0; color:var(--purple-ia); border-color:var(--purple-ia);"><i class="fas fa-user-edit"></i> Editar Gestión de Candidato</div>
       <input type="hidden" id="editPostulanteId">
-      
       <div class="form-admin" style="padding:0; background:transparent; border:none; margin-bottom:12px;">
         <div class="form-group">
-          <label for="editPostulanteEstatus">Semáforo / Estatus:</label>
+          <label for="editPostulanteEstatus">Estatus:</label>
           <select id="editPostulanteEstatus">
             <option value="Pendiente">🟡 Pendiente</option>
-            <option value="Entrevista">🔵 Citado a Entrevista</option>
+            <option value="Entrevista">🔵 Citado</option>
             <option value="Contratado">🟢 Contratado</option>
             <option value="Rechazado">🔴 Rechazado</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="editPostulanteDia">Día Asignado de Entrevista:</label>
+          <label for="editPostulanteDia">Día:</label>
           <select id="editPostulanteDia">
             <option value="">-- Sin Asignar --</option>
             <option value="Lunes">Lunes</option>
@@ -889,33 +874,17 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
             <option value="Sábado">Sábado</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="editPostulanteHora">Hora de la Cita:</label>
-          <input type="time" id="editPostulanteHora">
-        </div>
-        <div class="form-group">
-          <label for="editPostulanteReclutador">Asignar a Reclutador:</label>
-          <select id="editPostulanteReclutador">
-            <option value="">-- Sin Reclutador --</option>
-          </select>
-        </div>
-        <div class="form-group full-width">
-          <label for="editPostulanteNotas">Notas de Seguimiento Interno:</label>
-          <textarea id="editPostulanteNotas" placeholder="Escribe aquí las observaciones..."></textarea>
-        </div>
+        <div class="form-group"><label for="editPostulanteHora">Hora:</label><input type="time" id="editPostulanteHora"></div>
+        <div class="form-group"><label for="editPostulanteReclutador">Reclutador:</label><select id="editPostulanteReclutador"><option value="">-- Sin Reclutador --</option></select></div>
+        <div class="form-group full-width"><label for="editPostulanteNotas">Notas:</label><textarea id="editPostulanteNotas"></textarea></div>
       </div>
       <div style="display:flex; gap:10px;">
-        <button type="button" class="btn-update-final" id="btnGuardarCambiosPostulante" style="background:var(--purple-ia);"><i class="fas fa-check"></i> Actualizar Expediente</button>
+        <button type="button" class="btn-update-final" id="btnGuardarCambiosPostulante" style="background:var(--purple-ia);"><i class="fas fa-check"></i> Actualizar</button>
         <button type="button" class="btn-delete-mode" id="btnCerrarEdicionPostulante"><i class="fas fa-times"></i> Cancelar</button>
       </div>
     </div>
 
-    <!-- Buscador e Inventario de Postulantes -->
-    <div class="search-container">
-      <i class="fas fa-search" style="color: var(--text-muted);"></i>
-      <input type="text" id="buscarPostulanteInput" placeholder="Buscar postulante...">
-    </div>
-
+    <div class="search-container"><i class="fas fa-search" style="color: var(--text-muted);"></i><input type="text" id="buscarPostulanteInput" placeholder="Buscar postulante..."></div>
     <div style="overflow-x: auto;">
       <table class="empresas-table" id="tablaPostulantes">
         <thead>
@@ -933,11 +902,232 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     </div>
   </div>
 
-  // PESTAÑA 4 - ESTADÍSTICAS DEMOGRÁFICAS (MODIFICADA: SOLO CONTEOS REALES DE DEMANDA)
+  <!-- 📊 PESTAÑA 4 - ESTADÍSTICAS DEMOGRÁFICAS (CORREGIDA Y ESTRUCTURADA) -->
+  <div id="tab-tres" class="tab-content">
+    
+    <!-- Sección Candidatos -->
+    <div class="demo-section">
+      <div class="demo-data">
+        <h3><i class="fas fa-users"></i> Demografía de Candidatos</h3>
+        <ul class="data-list">
+          <li><strong>Total Registrados:</strong> <span id="cand-total" style="font-weight:bold; color:var(--primary-orange);">0</span></li>
+          <li><strong>Edad Promedio:</strong> <span id="cand-edad" style="font-weight:bold; color:#a78bfa;">0 años</span></li>
+          <li><strong>Ubicación de Mayor Demanda:</strong> <span id="cand-ubicacion" style="font-weight:bold; color:#10b981;">No especificada</span></li>
+        </ul>
+      </div>
+      <div class="demo-chart">
+        <canvas id="chartCandidatos"></canvas>
+      </div>
+    </div>
+
+    <!-- Sección Vacantes -->
+    <div class="demo-section">
+      <div class="demo-data">
+        <h3><i class="fas fa-briefcase"></i> Análisis Real de Vacantes</h3>
+        <ul class="data-list">
+          <li><strong>Estatus Vacantes:</strong> <span id="vac-activas" style="font-weight:bold; color:#38bdf8;">0 activas</span></li>
+          <li><strong>Vacante más Solicitada:</strong> <span id="vac-area" style="font-weight:bold; color:var(--primary-orange);">Ninguna</span></li>
+          <li><strong>Demanda de la Top Vacante:</strong> <span id="vac-sueldo" style="font-weight:bold; color:#10b981;">0 postulantes</span></li>
+        </ul>
+      </div>
+      <div class="demo-chart">
+        <canvas id="chartVacantes"></canvas>
+      </div>
+    </div>
+
+    <!-- Sección Empresas -->
+    <div class="demo-section">
+      <div class="demo-data">
+        <h3><i class="fas fa-building"></i> Tráfico Real por Empresa</h3>
+        <ul class="data-list">
+          <li><strong>Empresas en Sistema:</strong> <span id="emp-total" style="font-weight:bold; color:#38bdf8;">0</span></li>
+          <li><strong>Empresa con Mayor Tráfico:</strong> <span id="emp-giro" style="font-weight:bold; color:var(--primary-orange);">Ninguna</span></li>
+          <li><strong>Postulantes en Top Empresa:</strong> <span id="emp-region" style="font-weight:bold; color:#10b981;">0 postulantes</span></li>
+        </ul>
+      </div>
+      <div class="demo-chart">
+        <canvas id="chartEmpresas"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PESTAÑA 5 -->
+  <div id="tabReclutadores" class="tab-content">
+    <div class="form-admin">
+      <div class="section-divider" style="margin-top:0;"><i class="fas fa-user-plus"></i> Registrar Nuevo Reclutador</div>
+      <div class="form-group"><label for="recIdInput">ID Reclutador</label><input type="text" id="recIdInput" placeholder="Ej: REC01"></div>
+      <div class="form-group"><label for="recNombreInput">Nombre Completo</label><input type="text" id="recNombreInput" placeholder="Ej: Carlos Mendoza"></div>
+      <div class="form-group"><label for="recTelefonoInput">Teléfono</label><input type="tel" id="recTelefonoInput" placeholder="Ej: 8119876543"></div>
+      <div class="form-group"><label for="recEstatusSelect">Estatus</label><select id="recEstatusSelect"><option value="activo">✅ Activo</option><option value="inactivo">❌ Inactivo</option></select></div>
+      <div class="dual-buttons-layout">
+        <button type="button" id="btnGuardarReclutador" class="btn-add"><i class="fas fa-user-check"></i> Registrar</button>
+        <button type="button" id="btnActualizarReclutador" class="btn-update-final" style="display:none;"><i class="fas fa-user-edit"></i> Cambios</button>
+        <button type="button" id="btnCancelarEdicionReclutador" class="btn-delete-mode" style="display:none;"><i class="fas fa-times"></i> Cancelar</button>
+      </div>
+    </div>
+    <div class="search-container"><i class="fas fa-search" style="color: var(--text-muted);"></i><input type="text" id="buscarReclutadorInput" placeholder="Buscar..."></div>
+    <div style="overflow-x: auto;">
+      <table class="empresas-table" id="tablaReclutadores">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Estatus</th><th>Acciones</th></tr></thead>
+        <tbody id="tbodyReclutadores"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PESTAÑA 6 -->
+  <div id="tabSistemaLogs" class="tab-content">
+    <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 15px;">
+      <div class="section-divider" style="margin-top:0;"><i class="fas fa-terminal"></i> Auditoría Operativa</div>
+      <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">Monitoreo en tiempo real de Firebase.</p>
+        <button type="button" class="btn-delete-mode" style="padding: 8px 14px; font-size: 0.82rem;" id="btnLimpiarLogsPantalla"><i class="fas fa-trash-sweep"></i> Limpiar</button>
+      </div>
+    </div>
+    <div class="log-box" id="consolaSistemaLogs"><div class="log-item"><span class="log-time">[SISTEMA]</span> <span class="log-action" style="color: var(--green-success);">Iniciado...</span></div></div>
+  </div>
+
+</div> <!-- FIN .admin-container -->
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script>
+// ==============================================
+// VARIABLES GLOBALES (TODAS LAS FUNCIONES ACCEDEN)
+// ==============================================
+let db;
+let listaEmpresasGlobal = [];
+let listaVacantesGlobal = [];
+let listaReclutadoresGlobal = [];
+let listaPostulantesGlobal = [];
+let idEmpresaEdicionActiva = null;
+let idReclutadorEdicionActiva = null;
+let filtroAgendaActual = 'TODOS';
+const BASE_URL_GITHUB = 'https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=';
+const LOGO_POR_DEFECTO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="%23ff6600"><rect width="64" height="64" rx="12"/><text x="50%25" y="55%25" font-size="32" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold">E</text></svg>';
+
+// Instancias de Gráficos de Pestaña 4 y Pestaña 3
+let chartCandidatosInst = null, chartVacantesInst = null, chartEmpresasInst = null;
+let chartEmpresasRealesInst = null, chartVacantesRealesInst = null;
+
+// ==============================================
+// 1. FUNCIONAMIENTO DE PESTAÑAS (100% CORREGIDO)
+// ==============================================
+function inicializarNavegacionTabs() {
+  const botonesTab = document.querySelectorAll('.tabs-menu .tab-btn');
+  const contenedoresTab = document.querySelectorAll('.tab-content');
+  
+  botonesTab.forEach(boton => {
+    boton.addEventListener('click', () => {
+      botonesTab.forEach(b => b.classList.remove('active'));
+      contenedoresTab.forEach(c => c.classList.remove('active'));
+      
+      boton.classList.add('active');
+      const tabTarget = boton.getAttribute('data-tab');
+      const contenedorActivo = document.getElementById(tabTarget);
+      
+      if (contenedorActivo) {
+        contenedorActivo.classList.add('active');
+        registrarLogSistema("Navegación", `Cambio a pestaña: ${tabTarget}`);
+        
+        setTimeout(() => {
+          if (tabTarget === 'tab-tres' && typeof renderizarEstadisticasPestañaTres === 'function') {
+            renderizarEstadisticasPestañaTres();
+          }
+          if (tabTarget === 'tabRegistros') {
+            calcularMetricasDemograficas();
+            renderizarTablaPostulantes();
+            renderizarGraficosPestañaTres();
+          }
+        }, 100);
+      }
+    });
+  });
+}
+
+// ============================================================
+// PESTAÑA 3 - GRÁFICOS ANALÍTICOS DEMOGRÁFICOS REALES
+// ============================================================
+window.renderizarGraficosPestañaTres = function() {
+  // 1. TOP EMPRESAS CON MÁS POSTULADOS
+  const conteoEmpresas = {};
+  listaPostulantesGlobal.forEach(p => {
+    const emp = (p.empresa || p.empresaId || "Sin especificar").toString().trim();
+    conteoEmpresas[emp] = (conteoEmpresas[emp] || 0) + 1;
+  });
+  
+  const empresasOrdenadas = Object.entries(conteoEmpresas).sort((a, b) => b[1] - a[1]);
+  const labelsEmp = empresasOrdenadas.slice(0, 5).map(e => e[0]);
+  const dataEmp = empresasOrdenadas.slice(0, 5).map(e => e[1]);
+  
+  const ctxEmpReales = document.getElementById('chartEmpresasReales');
+  if (ctxEmpReales) {
+    if (chartEmpresasRealesInst) chartEmpresasRealesInst.destroy();
+    chartEmpresasRealesInst = new Chart(ctxEmpReales, {
+      type: 'bar',
+      data: {
+        labels: labelsEmp.length ? labelsEmp : ["Sin Datos"],
+        datasets: [{
+          label: 'Postulantes',
+          data: dataEmp.length ? dataEmp : [0],
+          backgroundColor: '#ff6600',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' } },
+          y: { beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 } }
+        }
+      }
+    });
+  }
+
+  // 2. DEMANDA REAL POR VACANTE
+  const conteoVacantes = {};
+  listaPostulantesGlobal.forEach(p => {
+    const vac = (p.vacanteInteres || p.vacante || "Sin especificar").toString().toUpperCase().trim();
+    conteoVacantes[vac] = (conteoVacantes[vac] || 0) + 1;
+  });
+  
+  const vacantesOrdenadas = Object.entries(conteoVacantes).sort((a, b) => b[1] - a[1]);
+  const labelsVac = vacantesOrdenadas.slice(0, 5).map(v => v[0]);
+  const dataVac = vacantesOrdenadas.slice(0, 5).map(v => v[1]);
+  
+  const ctxVacReales = document.getElementById('chartVacantesReales');
+  if (ctxVacReales) {
+    if (chartVacantesRealesInst) chartVacantesRealesInst.destroy();
+    chartVacantesRealesInst = new Chart(ctxVacReales, {
+      type: 'bar',
+      data: {
+        labels: labelsVac.length ? labelsVac : ["Sin Datos"],
+        datasets: [{
+          label: 'Postulantes',
+          data: dataVac.length ? dataVac : [0],
+          backgroundColor: '#8b5cf6',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' } },
+          y: { beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 } }
+        }
+      }
+    });
+  }
+};
+
+// ============================================================
+// PESTAÑA 4 - ESTADÍSTICAS DEMOGRÁFICAS (CONTEOS REALES)
+// ============================================================
 window.renderizarEstadisticasPestañaTres = function() {
-    // ==============================================
-    // SECCIÓN 1: CANDIDATOS (se mantiene igual)
-    // ==============================================
     const totalCand = listaPostulantesGlobal.length;
     let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
     let ciudades = {};
@@ -961,12 +1151,10 @@ window.renderizarEstadisticasPestañaTres = function() {
         if (ciudades[key] > maxUbi) { maxUbi = ciudades[key]; ubicacionPrincipal = key; }
     }
     
-    // Actualizar textos de candidatos
     document.getElementById('cand-total').textContent = totalCand;
     document.getElementById('cand-edad').textContent = `${edadPromedio} años`;
     document.getElementById('cand-ubicacion').textContent = ubicacionPrincipal;
     
-    // Gráfico 1: Género de Candidatos
     const ctxCand = document.getElementById('chartCandidatos');
     if (ctxCand) {
         if (chartCandidatosInst) chartCandidatosInst.destroy();
@@ -989,36 +1177,26 @@ window.renderizarEstadisticasPestañaTres = function() {
         });
     }
 
-    // ==============================================
-    // SECCIÓN 2: VACANTES (NUEVA: SOLO DEMANDA REAL)
-    // ==============================================
-    // Contar postulantes POR VACANTE (datos reales, no promedios)
+    // SECCIÓN VACANTES
     const conteoVacantes = {};
     listaPostulantesGlobal.forEach(p => {
         const vacante = (p.vacanteInteres || p.vacante || "Sin especificar").toString().toUpperCase().trim();
         conteoVacantes[vacante] = (conteoVacantes[vacante] || 0) + 1;
     });
     
-    // Ordenar de MAYOR a MENOR demanda
-    const vacantesOrdenadas = Object.entries(conteoVacantes)
-        .sort((a, b) => b[1] - a[1]);
-    
-    // Datos para textos
+    const vacantesOrdenadas = Object.entries(conteoVacantes).sort((a, b) => b[1] - a[1]);
     const totalVacantesSistema = listaVacantesGlobal.length;
     const vacantesActivas = listaVacantesGlobal.filter(v => v.estatus === 'disponible').length;
     const vacanteTop = vacantesOrdenadas[0] ? vacantesOrdenadas[0][0] : "Sin datos";
     const vacanteTopCantidad = vacantesOrdenadas[0] ? vacantesOrdenadas[0][1] : 0;
     
-    // Actualizar textos de vacantes (SIN PROMEDIOS)
     document.getElementById('vac-activas').textContent = `${vacantesActivas} de ${totalVacantesSistema} totales`;
     document.getElementById('vac-area').textContent = vacanteTop;
-    document.getElementById('vac-sueldo').textContent = `${vacanteTopCantidad} postulantes`; // Antes era sueldo promedio → AHORA es demanda real
+    document.getElementById('vac-sueldo').textContent = `${vacanteTopCantidad} postulantes`;
     
-    // Datos para gráfico (TOP 7 más solicitadas)
     const topVacantesLabels = vacantesOrdenadas.slice(0, 7).map(v => v[0]);
     const topVacantesData = vacantesOrdenadas.slice(0, 7).map(v => v[1]);
     
-    // Gráfico 2: Vacantes MÁS SOLICITADAS (barras horizontales para leer nombres mejor)
     const ctxVac = document.getElementById('chartVacantes');
     if (ctxVac) {
         if (chartVacantesInst) chartVacantesInst.destroy();
@@ -1043,66 +1221,39 @@ window.renderizarEstadisticasPestañaTres = function() {
                 }]
             },
             options: {
-                indexAxis: 'y', // HORIZONTAL (mejor para nombres largos de vacantes)
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#18273c',
-                        titleColor: '#fff',
-                        bodyColor: '#f1f5f9',
-                        callbacks: {
-                            label: function(ctx) {
-                                return `${ctx.parsed.x} postulante(s)`;
-                            }
-                        }
-                    }
+                    legend: { display: false }
                 },
                 scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: { color: '#94a3b8', stepSize: 1 },
-                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
-                    },
-                    y: {
-                        ticks: { color: '#f1f5f9', font: { size: 11 } },
-                        grid: { display: false }
-                    }
+                    x: { beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 } },
+                    y: { ticks: { color: '#f1f5f9', font: { size: 11 } } }
                 }
             }
         });
     }
 
-    // ==============================================
-    // SECCIÓN 3: EMPRESAS (NUEVA: SOLO DEMANDA REAL)
-    // ==============================================
-    // Contar postulantes POR EMPRESA (datos reales)
+    // SECCIÓN EMPRESAS
     const conteoEmpresas = {};
     listaPostulantesGlobal.forEach(p => {
         const empresa = (p.empresa || p.empresaId || "Sin especificar").toString().trim();
         conteoEmpresas[empresa] = (conteoEmpresas[empresa] || 0) + 1;
     });
     
-    // Ordenar de MAYOR a MENOR demanda
-    const empresasOrdenadas = Object.entries(conteoEmpresas)
-        .sort((a, b) => b[1] - a[1]);
-    
-    // Datos para textos
+    const empresasOrdenadas = Object.entries(conteoEmpresas).sort((a, b) => b[1] - a[1]);
     const totalEmpresas = listaEmpresasGlobal.length;
     const empresaTop = empresasOrdenadas[0] ? empresasOrdenadas[0][0] : "Sin datos";
     const empresaTopCantidad = empresasOrdenadas[0] ? empresasOrdenadas[0][1] : 0;
     
-    // Actualizar textos de empresas (SIN GIROS HARCODEADOS NI REGIONES FALSAS)
     document.getElementById('emp-total').textContent = `${totalEmpresas} aliadas`;
-    document.getElementById('emp-giro').textContent = empresaTop; // Antes era "Manufactura/Servicios" fijo → AHORA es la #1 real
-    document.getElementById('emp-region').textContent = `${empresaTopCantidad} postulantes`; // Antes era región → AHORA es demanda real
+    document.getElementById('emp-giro').textContent = empresaTop;
+    document.getElementById('emp-region').textContent = `${empresaTopCantidad} postulantes`;
     
-    // Datos para gráfico (TOP 5 más demandadas)
     const topEmpresasLabels = empresasOrdenadas.slice(0, 5).map(e => e[0]);
     const topEmpresasData = empresasOrdenadas.slice(0, 5).map(e => e[1]);
     
-    // Gráfico 3: Empresas MÁS DEMANDADAS (gráfico de anillo para comparación rápida)
     const ctxEmp = document.getElementById('chartEmpresas');
     if (ctxEmp) {
         if (chartEmpresasInst) chartEmpresasInst.destroy();
@@ -1112,16 +1263,9 @@ window.renderizarEstadisticasPestañaTres = function() {
                 labels: topEmpresasLabels.length ? topEmpresasLabels : ["Sin datos aún"],
                 datasets: [{
                     data: topEmpresasData.length ? topEmpresasData : [1],
-                    backgroundColor: [
-                        '#ff6600',
-                        '#8b5cf6',
-                        '#10b981',
-                        '#38bdf8',
-                        '#f472b6'
-                    ],
+                    backgroundColor: ['#ff6600', '#8b5cf6', '#10b981', '#38bdf8', '#f472b6'],
                     borderColor: '#18273c',
-                    borderWidth: 3,
-                    hoverOffset: 10
+                    borderWidth: 3
                 }]
             },
             options: {
@@ -1129,162 +1273,12 @@ window.renderizarEstadisticasPestañaTres = function() {
                 maintainAspectRatio: false,
                 cutout: '55%',
                 plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            color: '#f1f5f9',
-                            padding: 12,
-                            font: { size: 11 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#18273c',
-                        callbacks: {
-                            label: function(ctx) {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = total > 0 ? Math.round((ctx.parsed / total) * 100) : 0;
-                                return `${ctx.parsed} postulantes (${pct}%)`;
-                            }
-                        }
-                    }
+                    legend: { position: 'right', labels: { color: '#f1f5f9', font: { size: 11 } } }
                 }
             }
         });
     }
 };
-
-  <!-- PESTAÑA 5 - CONTROL DE RECLUTADORES -->
-  <div id="tabReclutadores" class="tab-content">
-    <div class="form-admin">
-      <div class="section-divider" style="margin-top:0;"><i class="fas fa-user-plus"></i> Registrar Nuevo Reclutador / Personal</div>
-      
-      <div class="form-group">
-        <label for="recIdInput"><i class="fas fa-id-badge"></i> ID o Código de Reclutador</label>
-        <input type="text" id="recIdInput" placeholder="Ej: REC01, CARLOS_M">
-      </div>
-      
-      <div class="form-group">
-        <label for="recNombreInput"><i class="fas fa-user"></i> Nombre Completo</label>
-        <input type="text" id="recNombreInput" placeholder="Ej: Carlos Mendoza">
-      </div>
-      
-      <div class="form-group">
-        <label for="recTelefonoInput"><i class="fas fa-phone"></i> Teléfono de Contacto</label>
-        <input type="tel" id="recTelefonoInput" placeholder="Ej: 8119876543">
-      </div>
-      
-      <div class="form-group">
-        <label for="recEstatusSelect"><i class="fas fa-toggle-on"></i> Estatus Operativo</label>
-        <select id="recEstatusSelect">
-          <option value="activo">✅ Activo (Asignable)</option>
-          <option value="inactivo">❌ Inactivo</option>
-        </select>
-      </div>
-
-      <div class="dual-buttons-layout">
-        <button type="button" id="btnGuardarReclutador" class="btn-add"><i class="fas fa-user-check"></i> Registrar Reclutador</button>
-        <button type="button" id="btnActualizarReclutador" class="btn-update-final" style="display:none;"><i class="fas fa-user-edit"></i> Guardar Cambios</button>
-        <button type="button" id="btnCancelarEdicionReclutador" class="btn-delete-mode" style="display:none; padding:12px; font-size:1rem; width:100%;"><i class="fas fa-times"></i> Cancelar</button>
-      </div>
-    </div>
-
-    <div class="search-container">
-      <i class="fas fa-search" style="color: var(--text-muted);"></i>
-      <input type="text" id="buscarReclutadorInput" placeholder="Buscar reclutador por ID o nombre...">
-    </div>
-
-    <div style="overflow-x: auto;">
-      <table class="empresas-table" id="tablaReclutadores">
-        <thead>
-          <tr>
-            <th>ID Código</th>
-            <th>Nombre del Reclutador</th>
-            <th>Teléfono</th>
-            <th>Estatus</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyReclutadores"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- PESTAÑA 6 - BITÁCORA / LOG DEL SISTEMA -->
-  <div id="tabSistemaLogs" class="tab-content">
-    <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 15px;">
-      <div class="section-divider" style="margin-top:0;"><i class="fas fa-terminal"></i> Auditoría Operativa</div>
-      <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">
-          Monitoreo en tiempo real de inserciones, ediciones o bajas realizadas en Firebase.
-        </p>
-        <button type="button" class="btn-delete-mode" style="padding: 8px 14px; font-size: 0.82rem;" id="btnLimpiarLogsPantalla">
-          <i class="fas fa-trash-sweep"></i> Limpiar Consola Local
-        </button>
-      </div>
-    </div>
-
-    <div class="log-box" id="consolaSistemaLogs">
-      <div class="log-item">
-        <span class="log-time">[SISTEMA]</span> <span class="log-action" style="color: var(--green-success);">Consola de auditoría iniciada...</span>
-      </div>
-    </div>
-  </div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script>
-// ==============================================
-// VARIABLES GLOBALES (TODAS LAS FUNCIONES ACCEDEN)
-// ==============================================
-let db;
-let listaEmpresasGlobal = [];
-let listaVacantesGlobal = [];
-let listaReclutadoresGlobal = [];
-let listaPostulantesGlobal = [];
-let idEmpresaEdicionActiva = null;
-let idReclutadorEdicionActiva = null;
-let filtroAgendaActual = 'TODOS';
-const BASE_URL_GITHUB = 'https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=';
-const LOGO_POR_DEFECTO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="%23ff6600"><rect width="64" height="64" rx="12"/><text x="50%25" y="55%25" font-size="32" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold">E</text></svg>';
-
-// Gráficos
-let chartEmpresas = null, chartVacantes = null;
-let chartCandidatosInst = null, chartVacantesInst = null, chartEmpresasInst = null;
-
-// ==============================================
-// 1. FUNCIONAMIENTO DE PESTAÑAS (100% CORREGIDO)
-// ==============================================
-function inicializarNavegacionTabs() {
-  const botonesTab = document.querySelectorAll('.tabs-menu .tab-btn');
-  const contenedoresTab = document.querySelectorAll('.tab-content');
-  
-  botonesTab.forEach(boton => {
-    boton.addEventListener('click', () => {
-      // Quita activo de TODO
-      botonesTab.forEach(b => b.classList.remove('active'));
-      contenedoresTab.forEach(c => c.classList.remove('active'));
-      
-      // Activa el seleccionado
-      boton.classList.add('active');
-      const tabTarget = boton.getAttribute('data-tab');
-      const contenedorActivo = document.getElementById(tabTarget);
-      
-      if (contenedorActivo) {
-        contenedorActivo.classList.add('active');
-        registrarLogSistema("Navegación", `Cambio a pestaña: ${tabTarget}`);
-        
-        // Carga datos al cambiar de pestaña
-        setTimeout(() => {
-          if (tabTarget === 'tab-tres' && typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
-          if (tabTarget === 'tabRegistros') {
-            calcularMetricasDemograficas();
-            renderizarTablaPostulantes();
-          }
-        }, 100);
-      }
-    });
-  });
-}
 
 // ==============================================
 // 2. CONEXIÓN AUTOMÁTICA A FIREBASE
@@ -1302,29 +1296,24 @@ function conectarFirebaseConApiKey(apiKey) {
       appId: "1:103248576912:web:a1b2c3d4e5f6g7h8"
     };
     
-    // Inicializa SOLO si no existe
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     db = firebase.database();
     
     document.getElementById('estadoConexionApi').innerHTML = 
       '<i class="fas fa-circle-check" style="color:#10b981;"></i> Firebase CONECTADO';
     registrarLogSistema("Firebase", "Conexión exitosa");
-    escucharNodosFirebase(); // CARGA AUTOMÁTICA DE DATOS DEL SERVIDOR
+    escucharNodosFirebase();
     
   } catch (error) {
     document.getElementById('estadoConexionApi').innerHTML = 
-      `<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Error: ${error.message}`;
+      `<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Error`;
     registrarLogSistema("Error Firebase", error.message);
   }
 }
 
-// ==============================================
-// 3. ESCUCHA DATOS EN TIEMPO REAL DEL SERVIDOR
-// ==============================================
 function escucharNodosFirebase() {
   if (!db) return;
   
-  // 🔄 EMPRESAS
   db.ref('empresas').on('value', (snapshot) => {
     listaEmpresasGlobal = [];
     if (snapshot.exists()) {
@@ -1335,7 +1324,6 @@ function escucharNodosFirebase() {
     actualizarSelectoresEmpresa();
   });
   
-  // 🔄 VACANTES
   db.ref('vacantes_detalles').on('value', (snapshot) => {
     listaVacantesGlobal = [];
     if (snapshot.exists()) {
@@ -1354,7 +1342,6 @@ function escucharNodosFirebase() {
     actualizarSelectoresVacantes();
   });
   
-  // 🔄 RECLUTADORES
   db.ref('reclutadores').on('value', (snapshot) => {
     listaReclutadoresGlobal = [];
     if (snapshot.exists()) {
@@ -1365,7 +1352,6 @@ function escucharNodosFirebase() {
     actualizarSelectoresReclutadores();
   });
   
-  // 🔄 POSTULANTES
   db.ref('postulantes').on('value', (snapshot) => {
     listaPostulantesGlobal = [];
     if (snapshot.exists()) {
@@ -1374,12 +1360,14 @@ function escucharNodosFirebase() {
     }
     calcularMetricasDemograficas();
     renderizarTablaPostulantes();
+    
+    // Si la pestaña actual es la Agenda y Postulantes, actualiza los gráficos inmediatamente
+    if (document.getElementById('tabRegistros').classList.contains('active')) {
+      renderizarGraficosPestañaTres();
+    }
   });
 }
 
-// ==============================================
-// 4. FUNCIONES DE EMPRESAS
-// ==============================================
 function actualizarEnlaceGithub() {
   const inputId = document.getElementById('empIdInput');
   const spanId = document.getElementById('idEmpresaSpan');
@@ -1458,16 +1446,18 @@ function renderizarTablaEmpresas() {
     const tagsArray = (emp.tags || '').split(',').filter(t => t.trim());
     
     tr.innerHTML = `
-      <td><img src="${urlLogo}" alt="Logo" onerror="this.src='${LOGO_POR_DEFECTO}'" style="width:42px;height:42px;object-fit:contain;border-radius:6px;background:white;padding:2px;"></td>
-      <td style="font-weight:bold; color:var(--primary-orange); font-family:'Courier New',monospace;">${emp.idFirebase}</td>
-      <td style="font-weight:600;">${emp.nombre || '-'}</td>
-      <td><i class="fas fa-map-marker-alt" style="color:#f59e0b; font-size:0.75rem;"></i> ${emp.ubicacion || '-'}</td>
-      <td style="font-size:0.78rem;">
-        ${tagsArray.length ? tagsArray.map(tag => 
-          `<span style="display:inline-block; background:#1e293b; color:#cbd5e1; padding:2px 8px; border-radius:10px; margin:2px; border:1px solid var(--border-color);">${tag.trim()}</span>`
-        ).join('') : '<span style="color:var(--text-muted);">Sin tags</span>'}
-      </td>
-      <td>
+     <td>
+       <img src="${urlLogo}" alt="Logo" onerror="this.style.display='none';">
+     </td>
+     <td style="font-weight:bold; color:var(--primary-orange); font-family:'Courier New',monospace;">${emp.idFirebase}</td>
+     <td style="font-weight:600;">${emp.nombre || '-'}</td>
+     <td><i class="fas fa-map-marker-alt" style="color:#f59e0b; font-size:0.75rem;"></i> ${emp.ubicacion || '-'}</td>
+     <td style="font-size:0.78rem;">
+       ${tagsArray.length ? tagsArray.map(tag => 
+         `<span style="display:inline-block; background:#1e293b; color:#cbd5e1; padding:2px 8px; border-radius:10px; margin:2px; border:1px solid var(--border-color);">${tag.trim()}</span>`
+       ).join('') : '<span style="color:var(--text-muted);">Sin tags</span>'}
+     </td>
+     <td>
         <a href="${linkVacante}" target="_blank" class="btn-wa-premium" style="background:#0ea5e9; box-shadow:0 0 8px rgba(14,165,233,0.3); padding:4px 10px; font-size:0.75rem;">
           <i class="fas fa-link"></i>
         </a>
@@ -1523,9 +1513,6 @@ function eliminarEmpresaSistema(idEmpresa) {
     .then(() => registrarLogSistema("BAJA EMPRESA", idEmpresa));
 }
 
-// ==============================================
-// 5. OTRAS UTILIDADES & RECLUTADORES
-// ==============================================
 function registrarLogSistema(modulo, accion) {
   const consola = document.getElementById('consolaSistemaLogs');
   if (!consola) return;
@@ -1712,7 +1699,7 @@ function abrirEditorPostulante(id) {
   document.getElementById('editPostulanteDia').value = p.diaEntrevista || "";
   document.getElementById('editPostulanteHora').value = p.horaCita || "";
   document.getElementById('editPostulanteReclutador').value = p.reclutadorAsignado || "";
-  document.getElementById('editPostulanteNotas').value = p.notasInternas || "";
+  document.getElementById('editPostulanteNotas').value = p.notesInternas || p.notasInternas || "";
   document.getElementById('panelEdicionPostulante').classList.add('open');
 }
 
@@ -1726,15 +1713,12 @@ function eliminarPostulanteSistema(id) {
 // 6. EVENTOS GLOBALES
 // ==============================================
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Inicializa pestañas
   inicializarNavegacionTabs();
   
-  // ✅ Enlace GitHub en tiempo real
   const inputId = document.getElementById('empIdInput');
   inputId.addEventListener('input', actualizarEnlaceGithub);
   actualizarEnlaceGithub();
   
-  // ✅ Mostrar/ocultar API Key
   document.getElementById('toggleApiKey').addEventListener('click', (e) => {
     const input = document.getElementById('geminiApiKeyInput');
     const icon = e.currentTarget.querySelector('i');
@@ -1742,7 +1726,6 @@ document.addEventListener("DOMContentLoaded", () => {
     icon.className = input.type === 'text' ? 'fas fa-eye-slash' : 'fas fa-eye';
   });
   
-  // ✅ Conectar API Key al hacer clic
   const apiKeyInput = document.getElementById('geminiApiKeyInput');
   document.getElementById('btnConectarApiKey').addEventListener('click', () => {
     const clave = apiKeyInput.value.trim();
@@ -1751,14 +1734,12 @@ document.addEventListener("DOMContentLoaded", () => {
     conectarFirebaseConApiKey(clave);
   });
   
-  // ✅ CONEXIÓN AUTOMÁTICA AL CARGAR LA PÁGINA (CLAVE GUARDADA)
   const claveGuardada = localStorage.getItem('apiKeyGemini');
   if (claveGuardada) {
     apiKeyInput.value = claveGuardada;
     conectarFirebaseConApiKey(claveGuardada);
   }
   
-  // ✅ Probar conexión
   document.getElementById('btnProbarConexion').addEventListener('click', async () => {
     const estado = document.getElementById('estadoConexionApi');
     estado.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="color:#f59e0b;"></i> Probando...';
@@ -1775,7 +1756,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   
-  // ✅ Copiar enlace GitHub
   document.getElementById('btnCopiarLink').addEventListener('click', async () => {
     const id = document.getElementById('empIdInput').value.trim().toUpperCase();
     if (!id) return alert('❌ Escribe un ID primero');
@@ -1788,7 +1768,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { alert('Error al copiar'); }
   });
   
-  // ✅ Botones formulario empresas
   document.getElementById('btnLimpiarFormEmpresa').addEventListener('click', () => {
     if (confirm('¿Limpiar formulario?')) cancelarEdicionEmpresa();
   });
@@ -1823,13 +1802,11 @@ document.addEventListener("DOMContentLoaded", () => {
   
   document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', cancelarEdicionEmpresa);
   
-  // ✅ Selectores
   document.getElementById('buscarEmpresaInput').addEventListener('input', renderizarTablaEmpresas);
   document.getElementById('secEmpresaSelect').addEventListener('change', actualizarSelectoresVacantes);
   document.getElementById('buscarReclutadorInput').addEventListener('input', renderizarTablaReclutadores);
   document.getElementById('buscarPostulanteInput').addEventListener('input', renderizarTablaPostulantes);
   
-  // ✅ Reclutadores
   document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
     const id = document.getElementById('recIdInput').value.trim();
     if (!id) return alert('❌ ID obligatorio');
@@ -1870,7 +1847,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
   });
   
-  // ✅ Postulantes
   document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
     document.getElementById('panelEdicionPostulante').classList.remove('open');
   });
@@ -1890,7 +1866,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   
-  // ✅ Limpiar logs
   document.getElementById('btnLimpiarLogsPantalla').addEventListener('click', () => {
     document.getElementById('consolaSistemaLogs').innerHTML = 
       '<div class="log-item"><span class="log-time">[SISTEMA]</span> <span class="log-action" style="color:#10b981;">Consola limpiada</span></div>';

@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <!-- Librería para Exportación Masiva a Excel (SheetJS) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- LIBRERÍA DE GRÁFICOS AGREGADA (Chart.js) -->
+<!-- LIBRERÍA DE GRÁFICOS (Chart.js) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style> 
 :root { 
@@ -623,7 +623,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     <div class="tab2-grid-layout">
       
       <div class="sticky-column">
-        <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 0;">
+        <div class="form-admin" style="margin-bottom: 0;">
           <div class="section-divider" style="margin-top:0;"><i class="fas fa-bullseye"></i> Configuración de Destino</div> 
           <div class="form-group">
             <label for="secEmpresaSelect">Selecciona Empresa Matriz:</label>
@@ -697,7 +697,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA: FORMULARIO LINEAL DE REGISTRO DE VACANTE -->
+      <!-- COLUMNA DERECHA: FORMULARIO LINEAL -->
       <div>
         <div class="form-admin" style="margin-bottom:0;">
           <div class="section-divider" style="margin-top:0;"><i class="fas fa-id-badge"></i> Identificación del Puesto</div>
@@ -738,7 +738,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
   <!-- PESTAÑA 3 - AGENDA Y CANDIDATOS -->
   <div id="tabRegistros" class="tab-content">
-    <!-- Métricas rápidas calculadas en tiempo real -->
     <div class="metrics-layout">
       <div class="metric-card">
         <div class="metric-val" id="totalPostulantesMetrica">0</div>
@@ -758,26 +757,24 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- Estructura visual para los gráficos analíticos reales -->
-    <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; margin-bottom: 25px;">
-        <!-- Tarjeta 1: Empresas Reales -->
-        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
-            <h3 style="margin-top:0; font-size: 16px; color: var(--primary-orange); font-family: sans-serif;"><i class="fas fa-building"></i> Top Empresas con Más Postulados</h3>
+    <!-- Gráficos analíticos de Demanda Real -->
+    <div class="charts-grid" style="margin-bottom: 25px;">
+        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h3 style="margin-top:0; font-size: 16px; color: var(--primary-orange);"><i class="fas fa-building"></i> Top Empresas con Más Postulados</h3>
             <div style="position: relative; height: 280px;">
                 <canvas id="chartEmpresasReales"></canvas>
             </div>
         </div>
 
-        <!-- Tarjeta 2: Vacantes Reales -->
-        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
-            <h3 style="margin-top:0; font-size: 16px; color: var(--primary-orange); font-family: sans-serif;"><i class="fas fa-briefcase"></i> Demanda Real por Vacante</h3>
+        <div class="chart-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h3 style="margin-top:0; font-size: 16px; color: var(--primary-orange);"><i class="fas fa-briefcase"></i> Demanda Real por Vacante</h3>
             <div style="position: relative; height: 280px;">
                 <canvas id="chartVacantesReales"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Agenda de Entrevistas Semanal & Filtros Rápidos -->
+    <!-- Agenda de Entrevistas Semanal -->
     <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 20px;">
       <div class="section-divider" style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Agenda de Entrevistas Semanal & Filtros Rápidos</div>
       
@@ -793,8 +790,8 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
       <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn-ia" style="background: var(--green-whatsapp); margin-top:0;" id="btnRecordatoriosMasivos"><i class="fab fa-whatsapp"></i> Generar Recordatorios de Mañana</button>
-          <button type="button" class="btn-ia" style="background: #1e293b; border: 1px solid var(--border-color); color: white; margin-top:0;" id="btnExportarExcelMasivo"><i class="fas fa-file-excel" style="color:#10b981;"></i> Exportar a Excel (SheetJS)</button>
+          <button type="button" class="btn-ia" style="background: var(--green-whatsapp); margin-top:0;" id="btnRecordatoriosMasivos"><i class="fab fa-whatsapp"></i> Generar Recordatorios</button>
+          <button type="button" class="btn-ia" style="background: #1e293b; border: 1px solid var(--border-color); color: white; margin-top:0;" id="btnExportarExcelMasivo"><i class="fas fa-file-excel" style="color:#10b981;"></i> Exportar a Excel</button>
         </div>
         <span id="lblFiltroAgendaActivo" style="font-size:0.85rem; color:var(--primary-orange); font-weight:bold;">Mostrando: Todos los postulantes</span>
       </div>
@@ -839,7 +836,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         </div>
         <div class="form-group full-width">
           <label for="editPostulanteNotas">Notas de Seguimiento Interno:</label>
-          <textarea id="editPostulanteNotas" placeholder="Escribe aquí las observaciones médicas, psicométricas o de transporte..."></textarea>
+          <textarea id="editPostulanteNotas" placeholder="Escribe aquí las observaciones..."></textarea>
         </div>
       </div>
       <div style="display:flex; gap:10px;">
@@ -851,7 +848,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     <!-- Buscador e Inventario de Postulantes -->
     <div class="search-container">
       <i class="fas fa-search" style="color: var(--text-muted);"></i>
-      <input type="text" id="buscarPostulanteInput" placeholder="Buscar postulante por nombre, teléfono, WhatsApp, empresa o vacante...">
+      <input type="text" id="buscarPostulanteInput" placeholder="Buscar postulante...">
     </div>
 
     <div style="overflow-x: auto;">
@@ -925,14 +922,14 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
   </div>
 
-  <!-- PESTAÑA 5 - CONTROL DE RECLUTADORES (MINI ERP) -->
+  <!-- PESTAÑA 5 - CONTROL DE RECLUTADORES -->
   <div id="tabReclutadores" class="tab-content">
     <div class="form-admin">
       <div class="section-divider" style="margin-top:0;"><i class="fas fa-user-plus"></i> Registrar Nuevo Reclutador / Personal</div>
       
       <div class="form-group">
         <label for="recIdInput"><i class="fas fa-id-badge"></i> ID o Código de Reclutador</label>
-        <input type="text" id="recIdInput" placeholder="Ej: REC01, CARLOS_M, ANA_R">
+        <input type="text" id="recIdInput" placeholder="Ej: REC01, CARLOS_M">
       </div>
       
       <div class="form-group">
@@ -984,10 +981,10 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
   <!-- PESTAÑA 6 - BITÁCORA / LOG DEL SISTEMA -->
   <div id="tabSistemaLogs" class="tab-content">
     <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 15px;">
-      <div class="section-divider" style="margin-top:0;"><i class="fas fa-terminal"></i> Auditoría Operativa de Cambios y Acciones</div>
+      <div class="section-divider" style="margin-top:0;"><i class="fas fa-terminal"></i> Auditoría Operativa</div>
       <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
         <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">
-          Monitoreo en tiempo real de inserciones, ediciones o bajas realizadas por los reclutadores en la base de datos de Firebase.
+          Monitoreo en tiempo real de inserciones, ediciones o bajas realizadas en Firebase.
         </p>
         <button type="button" class="btn-delete-mode" style="padding: 8px 14px; font-size: 0.82rem;" id="btnLimpiarLogsPantalla">
           <i class="fas fa-trash-sweep"></i> Limpiar Consola Local
@@ -997,12 +994,12 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
     <div class="log-box" id="consolaSistemaLogs">
       <div class="log-item">
-        <span class="log-time">[SISTEMA]</span> <span class="log-action" style="color: var(--green-success);">Consola de auditoría iniciada de forma local... Listo.</span>
+        <span class="log-time">[SISTEMA]</span> <span class="log-action" style="color: var(--green-success);">Consola de auditoría iniciada...</span>
       </div>
     </div>
   </div>
 
-</div> <!-- CIERRE DE .admin-container -->
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -1027,30 +1024,12 @@ let chartCandidatosInst = null;
 let chartVacantesInst = null;
 let chartEmpresasInst = null;
 
-// CONFIGURACIÓN IA
-const IA_LOGISTICA = {
-  modelo: "gemini-2.5-flash",
-  urlEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/",
-  promptSistema: `Actúa como un extractor experto de rutas de transporte de personal. Devuelve exclusivamente JSON válido...`
-};
-
-window.toggleAccordionIa = function() {
-  const contenido = document.getElementById('accordionIaContent');
-  const flecha = document.getElementById('accordionArrow');
-  if (contenido && flecha) {
-    contenido.classList.toggle('open');
-    flecha.className = contenido.classList.contains('open') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
-  }
-};
-
 function inicializarNavegacionTabs() {
   const botonesTab = document.querySelectorAll('.tabs-menu .tab-btn');
   const contenedoresTab = document.querySelectorAll('.tab-content');
 
   botonesTab.forEach(boton => {
     boton.addEventListener('click', () => {
-      if (boton.id === 'btnMotorVacantes' || boton.id === 'btnMotorLogistica') return;
-
       botonesTab.forEach(b => b.classList.remove('active'));
       contenedoresTab.forEach(c => c.classList.remove('active'));
 
@@ -1064,10 +1043,10 @@ function inicializarNavegacionTabs() {
         
         // Renderizado al cambiar de tabs
         if (tabTarget === 'tab-tres') {
-          setTimeout(() => { window.renderizarEstadisticasPestañaTres(); }, 50);
+          setTimeout(() => { window.renderizarEstadisticasPestañaTres(); }, 100);
         }
         if (tabTarget === 'tabRegistros') {
-          setTimeout(() => { window.cargarEstadisticasDemograficasReales(); }, 50);
+          setTimeout(() => { window.cargarEstadisticasDemograficasReales(); }, 100);
         }
       }
     });
@@ -1120,7 +1099,6 @@ function escucharNodosFirebase() {
     window.renderizarTablaEmpresas();
     window.actualizarSelectoresEmpresa();
     window.renderizarEstadisticasPestañaTres();
-    window.cargarEstadisticasDemograficasReales();
   });
 
   onValue(ref(db, 'vacantes_detalles'), (snapshot) => {
@@ -1161,17 +1139,14 @@ function escucharNodosFirebase() {
     }
     window.calcularMetricasDemograficas();
     window.renderizarTablaPostulantes();
-    window.renderizarEstadisticasPestañaTres();
     window.cargarEstadisticasDemograficasReales();
+    window.renderizarEstadisticasPestañaTres();
   });
 }
 
-// CARGA DE ESTADÍSTICAS REALES EN PESTAÑA 3 USANDO DB GLOBAL MODULAR
+// PESTAÑA 3 - CARGA DE ESTADÍSTICAS REALES EN PESTAÑA 3
 window.cargarEstadisticasDemograficasReales = function() {
-    if (listaPostulantesGlobal.length === 0) {
-        console.warn("No hay datos de postulantes para renderizar gráficos de Pestaña 3.");
-        return;
-    }
+    if (listaPostulantesGlobal.length === 0) return;
 
     const conteoEmpresas = {};
     const conteoVacantes = {};
@@ -1184,23 +1159,15 @@ window.cargarEstadisticasDemograficasReales = function() {
         conteoVacantes[vacanteNombre] = (conteoVacantes[vacanteNombre] || 0) + 1;
     });
 
-    const empresasLabels = Object.keys(conteoEmpresas);
-    const empresasData = Object.values(conteoEmpresas);
-
-    const vacantesLabels = Object.keys(conteoVacantes);
-    const vacantesData = Object.values(conteoVacantes);
-
-    renderizarGraficoEmpresas(empresasLabels, empresasData);
-    renderizarGraficoVacantes(vacantesLabels, vacantesData);
+    renderizarGraficoEmpresas(Object.keys(conteoEmpresas), Object.values(conteoEmpresas));
+    renderizarGraficoVacantes(Object.keys(conteoVacantes), Object.values(conteoVacantes));
 };
 
 function renderizarGraficoEmpresas(labels, data) {
     const canvas = document.getElementById('chartEmpresasReales');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    
     if (chartEmpresas) { chartEmpresas.destroy(); }
-
     chartEmpresas = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1216,9 +1183,7 @@ function renderizarGraficoEmpresas(labels, data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: '#f1f5f9' } }
-            },
+            plugins: { legend: { labels: { color: '#f1f5f9' } } },
             scales: {
                 x: { ticks: { color: '#94a3b8' } },
                 y: { beginAtZero: true, ticks: { stepSize: 1, color: '#94a3b8' } }
@@ -1231,18 +1196,14 @@ function renderizarGraficoVacantes(labels, data) {
     const canvas = document.getElementById('chartVacantesReales');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    
     if (chartVacantes) { chartVacantes.destroy(); }
-
     chartVacantes = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: [
-                    '#38bdf8', '#f472b6', '#a78bfa', '#10b981', '#f59e0b', '#0284c7'
-                ],
+                backgroundColor: ['#38bdf8', '#f472b6', '#a78bfa', '#10b981', '#f59e0b', '#0284c7'],
                 borderColor: '#111e30',
                 borderWidth: 2
             }]
@@ -1250,16 +1211,13 @@ function renderizarGraficoVacantes(labels, data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'right', labels: { color: '#f1f5f9' } }
-            }
+            plugins: { legend: { position: 'right', labels: { color: '#f1f5f9' } } }
         }
     });
 }
 
-// RENDEREAR ESTADÍSTICAS AVANZADAS DE LA PESTAÑA 4
+// PESTAÑA 4 - RENDEREAR ESTADÍSTICAS AVANZADAS DEMOGRÁFICAS
 window.renderizarEstadisticasPestañaTres = function() {
-  // --- 1. CANDIDATOS ---
   const totalCand = listaPostulantesGlobal.length;
   let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
   let ciudades = {};
@@ -1272,7 +1230,6 @@ window.renderizarEstadisticasPestañaTres = function() {
     const edad = parseInt(p.edad, 10);
     if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
 
-    // Mapeo simple de origen de postulantes
     const ciudad = p.direccion || p.origen || "No especificada";
     ciudades[ciudad] = (ciudades[ciudad] || 0) + 1;
   });
@@ -1284,14 +1241,12 @@ window.renderizarEstadisticasPestañaTres = function() {
     if (ciudades[key] > maxUbi) { maxUbi = ciudades[key]; ubicacionPrincipal = key; }
   }
 
-  const candTotalEl = document.getElementById('cand-total');
-  const candEdadEl = document.getElementById('cand-edad');
-  const candUbiEl = document.getElementById('cand-ubicacion');
+  // Llenar Textos en Pestaña 4
+  document.getElementById('cand-total').textContent = totalCand;
+  document.getElementById('cand-edad').textContent = `${edadPromedio} años`;
+  document.getElementById('cand-ubicacion').textContent = ubicacionPrincipal;
 
-  if (candTotalEl) candTotalEl.textContent = totalCand;
-  if (candEdadEl) candEdadEl.textContent = `${edadPromedio} años`;
-  if (candUbiEl) candUbiEl.textContent = ubicacionPrincipal;
-
+  // Gráfico 1: Genero de Candidatos (Pestaña 4)
   const ctxCand = document.getElementById('chartCandidatos');
   if (ctxCand) {
     if (chartCandidatosInst) chartCandidatosInst.destroy();
@@ -1314,7 +1269,7 @@ window.renderizarEstadisticasPestañaTres = function() {
     });
   }
 
-  // --- 2. VACANTES ---
+  // --- 2. VACANTES EN TAB 4 ---
   const vacActivas = listaVacantesGlobal.filter(v => v.estatus === 'disponible').length;
   let sumaSueldos = 0, conteoSueldos = 0;
   let areas = {};
@@ -1335,13 +1290,9 @@ window.renderizarEstadisticasPestañaTres = function() {
     if (areas[key] > maxArea) { maxArea = areas[key]; areaMasBuscada = key; }
   }
 
-  const vacActivasEl = document.getElementById('vac-activas');
-  const vacAreaEl = document.getElementById('vac-area');
-  const vacSueldoEl = document.getElementById('vac-sueldo');
-
-  if (vacActivasEl) vacActivasEl.textContent = vacActivas;
-  if (vacAreaEl) vacAreaEl.textContent = areaMasBuscada;
-  if (vacSueldoEl) vacSueldoEl.textContent = `${sueldoPromedio} semanales aprox.`;
+  document.getElementById('vac-activas').textContent = vacActivas;
+  document.getElementById('vac-area').textContent = areaMasBuscada;
+  document.getElementById('vac-sueldo').textContent = `${sueldoPromedio} semanales aprox.`;
 
   let ubicacionesVacantes = {};
   listaVacantesGlobal.forEach(v => {
@@ -1349,6 +1300,7 @@ window.renderizarEstadisticasPestañaTres = function() {
     ubicacionesVacantes[l] = (ubicacionesVacantes[l] || 0) + 1;
   });
 
+  // Gráfico 2: Ubicaciones de Vacantes (Pestaña 4)
   const ctxVac = document.getElementById('chartVacantes');
   if (ctxVac) {
     if (chartVacantesInst) chartVacantesInst.destroy();
@@ -1375,7 +1327,7 @@ window.renderizarEstadisticasPestañaTres = function() {
     });
   }
 
-  // --- 3. EMPRESAS ---
+  // --- 3. EMPRESAS EN TAB 4 ---
   const totalEmpresas = listaEmpresasGlobal.length;
   let regiones = {};
   listaEmpresasGlobal.forEach(e => {
@@ -1389,14 +1341,11 @@ window.renderizarEstadisticasPestañaTres = function() {
     if (regiones[key] > maxReg) { maxReg = regiones[key]; regionActiva = key; }
   }
 
-  const empTotalEl = document.getElementById('emp-total');
-  const empGiroEl = document.getElementById('emp-giro');
-  const empRegionEl = document.getElementById('emp-region');
+  document.getElementById('emp-total').textContent = totalEmpresas;
+  document.getElementById('emp-giro').textContent = "Manufactura / Servicios";
+  document.getElementById('emp-region').textContent = regionActiva;
 
-  if (empTotalEl) empTotalEl.textContent = totalEmpresas;
-  if (empGiroEl) empGiroEl.textContent = "Manufactura / Servicios";
-  if (empRegionEl) empRegionEl.textContent = regionActiva;
-
+  // Gráfico 3: Distribución de Empresas (Pestaña 4)
   const ctxEmp = document.getElementById('chartEmpresas');
   if (ctxEmp) {
     if (chartEmpresasInst) chartEmpresasInst.destroy();
@@ -1429,25 +1378,17 @@ window.calcularMetricasDemograficas = function() {
     else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') mujeres++;
 
     const edad = parseInt(p.edad, 10);
-    if (!isNaN(edad)) {
-      sumaEdades += edad;
-      conteoEdades++;
-    }
+    if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
   });
 
   const pctHombres = totalCandidatos > 0 ? Math.round((hombres / totalCandidatos) * 100) : 0;
   const pctMujeres = totalCandidatos > 0 ? Math.round((mujeres / totalCandidatos) * 100) : 0;
   const promedioEdad = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
 
-  const totalPostulantesEl = document.getElementById('totalPostulantesMetrica');
-  const metHombresEl = document.getElementById('metHombres');
-  const metMujeresEl = document.getElementById('metMujeres');
-  const metPromedioEdadEl = document.getElementById('metPromedioEdad');
-
-  if (totalPostulantesEl) totalPostulantesEl.textContent = totalCandidatos;
-  if (metHombresEl) metHombresEl.textContent = `${pctHombres}%`;
-  if (metMujeresEl) metMujeresEl.textContent = `${pctMujeres}%`;
-  if (metPromedioEdadEl) metPromedioEdadEl.textContent = `${promedioEdad} años`;
+  document.getElementById('totalPostulantesMetrica').textContent = totalCandidatos;
+  document.getElementById('metHombres').textContent = `${pctHombres}%`;
+  document.getElementById('metMujeres').textContent = `${pctMujeres}%`;
+  document.getElementById('metPromedioEdad').textContent = `${promedioEdad} años`;
 };
 
 window.filtrarAgendaPorEstatus = function(dia) {
@@ -1480,8 +1421,8 @@ window.renderizarTablaPostulantes = function() {
       const numLimpio = p.telefono.replace(/\D/g, "");
       const mensajePredefinido = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, nos comunicamos de Bolsa de Trabajo...`);
       botonWhatsapp = `
-        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-premium" title="Contactar por WhatsApp">
-          <i class="fab fa-whatsapp" style="font-size: 1rem;"></i> WhatsApp Premium
+        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-premium">
+          <i class="fab fa-whatsapp"></i> WhatsApp
         </a>
       `;
     }
@@ -1498,9 +1439,9 @@ window.renderizarTablaPostulantes = function() {
         </div>
       </td>
       <td>
-        <div class="actions-layout" style="margin-top:0; display: flex; gap: 6px;">
-          <button class="btn-edit-mode" style="padding:6px 10px; background: #292524; border: 1px solid #444;" onclick="window.abrirEditorPostulante('${p.idFirebase}')"><i class="fas fa-user-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:6px 10px; background: #292524; border: 1px solid #ef444433; color: #ef4444;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        <div class="actions-layout" style="margin-top:0;">
+          <button class="btn-edit-mode" style="padding:6px 10px;" onclick="window.abrirEditorPostulante('${p.idFirebase}')"><i class="fas fa-user-edit"></i></button>
+          <button class="btn-delete-mode" style="padding:6px 10px;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
         </div>
       </td>
     `;
@@ -1521,10 +1462,10 @@ window.abrirEditorPostulante = function(id) {
 };
 
 window.eliminarPostulanteSistema = function(id) {
-  if(!confirm("¿Eliminar postulación del sistema?")) return;
+  if(!confirm("¿Eliminar postulación?")) return;
   if(db && id) {
     remove(ref(db, `postulantes/${id}`)).then(() => {
-      registrarLogSistema("Postulantes", `Expediente eliminado con éxito: ${id}`);
+      registrarLogSistema("Postulantes", `Expediente eliminado: ${id}`);
     });
   }
 };
@@ -1580,10 +1521,10 @@ window.renderizarTablaEmpresas = function() {
   ).forEach(emp => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><img src="${emp.logoUrl}" alt="Logo" style="width:40px; height:40px; object-fit:contain; border-radius:4px;"></td>
+      <td><img src="${emp.logoUrl}" alt="Logo" style="width:40px; height:40px; object-fit:contain;"></td>
       <td style="font-weight:bold; color:var(--primary-orange);">${emp.idFirebase}</td>
       <td>${emp.nombre || '—'}</td>
-      <td style="color:#a8a29e; font-style:italic;">"${emp.textoBienvenida || '¡Te esperamos!'}"</td>
+      <td style="color:#a8a29e;">"${emp.textoBienvenida || '¡Te esperamos!'}"</td>
       <td>
         <div class="actions-layout" style="margin-top:0;">
           <button class="btn-edit-mode" style="padding:5px 10px;" onclick="window.cargarEmpresaEnEdicion('${emp.idFirebase}')"><i class="fas fa-edit"></i></button>
@@ -1752,14 +1693,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', window.cancelarEdicionEmpresa);
-
-  // Escuchar cambios en selector de empresa matriz (Pestaña 2) para filtrar las vacantes correspondientes
   document.getElementById('secEmpresaSelect').addEventListener('change', window.actualizarSelectoresVacantes);
-
-  // Buscador de empresas
   document.getElementById('buscarEmpresaInput').addEventListener('input', window.renderizarTablaEmpresas);
 
-  // Reclutadores persistencia
+  // Reclutadores
   document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
     const id = document.getElementById('recIdInput').value.trim();
     if(!id) return;
@@ -1796,16 +1733,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById('buscarReclutadorInput').addEventListener('input', window.renderizarTablaReclutadores);
-
-  // Buscador de postulantes
   document.getElementById('buscarPostulanteInput').addEventListener('input', window.renderizarTablaPostulantes);
 
-  // Cerrar editor rápido postulante
   document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
     document.getElementById('panelEdicionPostulante').classList.remove('open');
   });
 
-  // Guardar cambios postulante
   document.getElementById('btnGuardarCambiosPostulante').addEventListener('click', () => {
     const id = document.getElementById('editPostulanteId').value;
     if(!id || !db) return;

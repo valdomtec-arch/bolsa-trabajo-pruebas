@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <!-- Librería para Exportación Masiva a Excel (SheetJS) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- LIBRERÍA DE GRÁFICOS AGREGADA (Chart.js) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style> 
 :root { 
 --primary-orange: #ff6600; 
@@ -367,6 +369,69 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 }
 .log-time { color: #64748b; }
 .log-action { color: #f1f5f9; }
+
+/* ==========================================================================
+   ESTILOS PREMIUM: BOTÓN DE WHATSAPP CON EFECTO DE PULSO GLOW Y CONTENEDOR DE GRÁFICOS
+   ========================================================================== */
+.btn-wa-premium {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--green-whatsapp);
+  color: white !important;
+  font-weight: bold;
+  font-size: 0.85rem;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 0 10px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-wa-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(37, 211, 102, 0.8);
+  background-color: #20ba5a;
+}
+/* Efecto de pulso en el contorno */
+.btn-wa-premium::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  animation: glowPulse 1.8s infinite;
+}
+@keyframes glowPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+.chart-wrapper {
+  background: rgba(13, 23, 36, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chart-container-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 250px;
+  height: 220px;
+}
 </style> 
 </head> 
 <body> 
@@ -682,6 +747,24 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         </div>
 
       </div>
+
+      <!-- SECCIÓN SOLUCIONADA DE GRÁFICOS VISUALES -->
+      <div class="section-divider"><i class="fas fa-chart-bar"></i> Gráficos Estadísticos Interactivos</div>
+      <div class="charts-grid">
+        <div class="chart-wrapper">
+          <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--text-muted);">Distribución por Género</h4>
+          <div class="chart-container-canvas">
+            <canvas id="generoChartCanvas"></canvas>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--text-muted);">Rangos de Edad</h4>
+          <div class="chart-container-canvas">
+            <canvas id="edadChartCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- CONTROL DE AGENDA INTERACTIVA (LUNES A SÁBADO) y EXPORTACIÓN -->
@@ -882,6 +965,10 @@ let idReclutadorEdicionActiva = null;
 let filtroAgendaActual = 'TODOS';
 let datosIaDetectadosMasivos = null;
 let motorIaActivo = 'vacantes'; // Estado inicial por defecto
+
+// INSTANCIAS GLOBALES PARA EVITAR DUPLICADOS EN LOS GRÁFICOS
+let generoChartInstance = null;
+let edadChartInstance = null;
 
 // PROMPTS INTEGRADOS DE MOTOR DE IA DUAL
 const IA_VACANTES = {
@@ -1516,6 +1603,75 @@ window.calcularMetricasDemograficas = function() {
   if (lblR2) lblR2.textContent = `${r2} cand. (${totalCandidatos > 0 ? Math.round((r2/totalCandidatos)*100) : 0}%)`;
   if (lblR3) lblR3.textContent = `${r3} cand. (${totalCandidatos > 0 ? Math.round((r3/totalCandidatos)*100) : 0}%)`;
   if (lblR4) lblR4.textContent = `${r4} cand. (${totalCandidatos > 0 ? Math.round((r4/totalCandidatos)*100) : 0}%)`;
+
+  // RENDERIZADO / ACTUALIZACIÓN DINÁMICA DE LOS GRÁFICOS REALES (CHART.JS)
+  window.actualizarGraficosVisuales(hombres, mujeres, r1, r2, r3, r4);
+};
+
+window.actualizarGraficosVisuales = function(hombres, mujeres, r1, r2, r3, r4) {
+  const ctxGenero = document.getElementById('generoChartCanvas');
+  const ctxEdad = document.getElementById('edadChartCanvas');
+  if(!ctxGenero || !ctxEdad) return;
+
+  // 1. Gráfico de Pastel para Distribución de Género
+  if (generoChartInstance) {
+    generoChartInstance.data.datasets[0].data = [hombres, mujeres];
+    generoChartInstance.update();
+  } else {
+    generoChartInstance = new Chart(ctxGenero, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hombres', 'Mujeres'],
+        datasets: [{
+          data: [hombres, mujeres],
+          backgroundColor: ['#38bdf8', '#f472b6'],
+          borderWidth: 1,
+          borderColor: '#111e30'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#f1f5f9', font: { size: 10 } }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Gráfico de Barras para Rangos de Edad
+  if (edadChartInstance) {
+    edadChartInstance.data.datasets[0].data = [r1, r2, r3, r4];
+    edadChartInstance.update();
+  } else {
+    edadChartInstance = new Chart(ctxEdad, {
+      type: 'bar',
+      data: {
+        labels: ['18-25', '26-35', '36-45', '46+'],
+        datasets: [{
+          label: 'Postulantes',
+          data: [r1, r2, r3, r4],
+          backgroundColor: '#ff6600',
+          borderRadius: 4,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#94a3b8', font: { size: 10 }, stepSize: 1 }, grid: { color: '#243854' } }
+        }
+      }
+    });
+  }
 };
 
 window.filtrarAgendaPorEstatus = function(dia) {
@@ -1547,13 +1703,14 @@ window.renderizarTablaPostulantes = function() {
     const tr = document.createElement('tr');
     let badgeEstatus = `<span class="badge-estatus" style="background: #fed7aa; color: #ea580c; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${p.estatus || 'Pendiente'}</span>`;
     
-    let botonWhatsapp = '';
+    let botonWhatsapp = '—';
     if (p.telefono) {
       const numLimpio = p.telefono.replace(/\D/g, "");
       const mensajePredefinido = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, nos comunicamos de Bolsa de Trabajo para dar seguimiento a tu postulación...`);
+      // BOTÓN DE WHATSAPP MEJORADO (DISEÑO PREMIUM GLOW VERDE)
       botonWhatsapp = `
-        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-contacto" style="color: #25D366; font-size: 1.1rem; margin-right: 8px;" title="Contactar por WhatsApp">
-          <i class="fab fa-whatsapp"></i>
+        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-premium" title="Contactar por WhatsApp">
+          <i class="fab fa-whatsapp" style="font-size: 1rem;"></i> WhatsApp Premium
         </a>
       `;
     }
@@ -1563,7 +1720,6 @@ window.renderizarTablaPostulantes = function() {
       <td>
         <div style="display: flex; align-items: center;">
           ${botonWhatsapp}
-          <span style="color: #a8a29e;">${p.telefono || '—'}</span>
         </div>
       </td>
       <td><span style="color: var(--primary-orange); font-weight: 500;">${p.empresa || p.empresaId || '—'}</span> / ${p.vacanteInteres || '—'}</td>

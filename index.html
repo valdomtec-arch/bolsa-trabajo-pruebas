@@ -1065,7 +1065,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
   </div>
 
 </div>
-
 <script type="module">
 <!-- FIREBASE VERSIÓN GLOBAL (SIN MÓDULOS - TODAS LAS FUNCIONES LO VEN) -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -1173,7 +1172,6 @@ function escucharNodosFirebase() {
     }
     renderizarTablaEmpresas();
     actualizarSelectoresEmpresa();
-    if (typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
   });
   
   // 🔄 VACANTES
@@ -1193,7 +1191,6 @@ function escucharNodosFirebase() {
       }
     }
     actualizarSelectoresVacantes();
-    if (typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
   });
   
   // 🔄 RECLUTADORES
@@ -1216,13 +1213,11 @@ function escucharNodosFirebase() {
     }
     calcularMetricasDemograficas();
     renderizarTablaPostulantes();
-    if (typeof cargarEstadisticasDemograficasReales === 'function') cargarEstadisticasDemograficasReales();
-    if (typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
   });
 }
 
 // ==============================================
-// 4. FUNCIONES DE EMPRESAS (VERSIÓN ÚNICA - SIN DUPLICADOS)
+// 4. FUNCIONES DE EMPRESAS
 // ==============================================
 function actualizarEnlaceGithub() {
   const inputId = document.getElementById('empIdInput');
@@ -1289,8 +1284,8 @@ function renderizarTablaEmpresas() {
   
   const empresasFiltradas = listaEmpresasGlobal.filter(emp => {
     const nombre = emp.nombre || '-';
-    const tags = emp.tags || emp.imagen || '';
-    const ubicacion = emp.ubicacion || emp.tags || '';
+    const tags = emp.tags || '';
+    const ubicacion = emp.ubicacion || '';
     const texto = `${emp.idFirebase} ${nombre} ${tags} ${ubicacion}`.toLowerCase();
     return texto.includes(filtro);
   });
@@ -1368,7 +1363,7 @@ function eliminarEmpresaSistema(idEmpresa) {
 }
 
 // ==============================================
-// 5. FUNCIONES DE VACANTES, RECLUTADORES, POSTULANTES, ESTADÍSTICAS
+// 5. OTRAS UTILIDADES & RECLUTADORES
 // ==============================================
 function registrarLogSistema(modulo, accion) {
   const consola = document.getElementById('consolaSistemaLogs');
@@ -1567,18 +1562,18 @@ function eliminarPostulanteSistema(id) {
 }
 
 // ==============================================
-// 6. EVENTOS GLOBALES (UN SOLO DOMContentLoaded)
+// 6. EVENTOS GLOBALES
 // ==============================================
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ 1. Inicializa pestañas (AHORA SÍ FUNCIONA)
+  // ✅ Inicializa pestañas
   inicializarNavegacionTabs();
   
-  // ✅ 2. Enlace GitHub en tiempo real
+  // ✅ Enlace GitHub en tiempo real
   const inputId = document.getElementById('empIdInput');
   inputId.addEventListener('input', actualizarEnlaceGithub);
   actualizarEnlaceGithub();
   
-  // ✅ 3. Mostrar/ocultar API Key
+  // ✅ Mostrar/ocultar API Key
   document.getElementById('toggleApiKey').addEventListener('click', (e) => {
     const input = document.getElementById('geminiApiKeyInput');
     const icon = e.currentTarget.querySelector('i');
@@ -1586,7 +1581,7 @@ document.addEventListener("DOMContentLoaded", () => {
     icon.className = input.type === 'text' ? 'fas fa-eye-slash' : 'fas fa-eye';
   });
   
-  // ✅ 4. Conectar API Key al hacer clic
+  // ✅ Conectar API Key al hacer clic
   const apiKeyInput = document.getElementById('geminiApiKeyInput');
   document.getElementById('btnConectarApiKey').addEventListener('click', () => {
     const clave = apiKeyInput.value.trim();
@@ -1595,14 +1590,14 @@ document.addEventListener("DOMContentLoaded", () => {
     conectarFirebaseConApiKey(clave);
   });
   
-  // ✅ 5. CONEXIÓN AUTOMÁTICA AL CARGAR LA PÁGINA (CLAVE GUARDADA)
+  // ✅ CONEXIÓN AUTOMÁTICA AL CARGAR LA PÁGINA (CLAVE GUARDADA)
   const claveGuardada = localStorage.getItem('apiKeyGemini');
   if (claveGuardada) {
     apiKeyInput.value = claveGuardada;
     conectarFirebaseConApiKey(claveGuardada);
   }
   
-  // ✅ 6. Probar conexión
+  // ✅ Probar conexión
   document.getElementById('btnProbarConexion').addEventListener('click', async () => {
     const estado = document.getElementById('estadoConexionApi');
     estado.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="color:#f59e0b;"></i> Probando...';
@@ -1619,7 +1614,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   
-  // ✅ 7. Copiar enlace GitHub
+  // ✅ Copiar enlace GitHub
   document.getElementById('btnCopiarLink').addEventListener('click', async () => {
     const id = document.getElementById('empIdInput').value.trim().toUpperCase();
     if (!id) return alert('❌ Escribe un ID primero');
@@ -1632,7 +1627,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { alert('Error al copiar'); }
   });
   
-  // ✅ 8. Botones formulario empresas
+  // ✅ Botones formulario empresas
   document.getElementById('btnLimpiarFormEmpresa').addEventListener('click', () => {
     if (confirm('¿Limpiar formulario?')) cancelarEdicionEmpresa();
   });
@@ -1667,13 +1662,13 @@ document.addEventListener("DOMContentLoaded", () => {
   
   document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', cancelarEdicionEmpresa);
   
-  // ✅ 9. Selectores
+  // ✅ Selectores
   document.getElementById('buscarEmpresaInput').addEventListener('input', renderizarTablaEmpresas);
   document.getElementById('secEmpresaSelect').addEventListener('change', actualizarSelectoresVacantes);
   document.getElementById('buscarReclutadorInput').addEventListener('input', renderizarTablaReclutadores);
   document.getElementById('buscarPostulanteInput').addEventListener('input', renderizarTablaPostulantes);
   
-  // ✅ 10. Reclutadores
+  // ✅ Reclutadores
   document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
     const id = document.getElementById('recIdInput').value.trim();
     if (!id) return alert('❌ ID obligatorio');
@@ -1714,7 +1709,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
   });
   
-  // ✅ 11. Postulantes
+  // ✅ Postulantes
   document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
     document.getElementById('panelEdicionPostulante').classList.remove('open');
   });
@@ -1734,7 +1729,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   
-  // ✅ 12. Limpiar logs
+  // ✅ Limpiar logs
   document.getElementById('btnLimpiarLogsPantalla').addEventListener('click', () => {
     document.getElementById('consolaSistemaLogs').innerHTML = 
       '<div class="log-item"><span class="log-time">[SISTEMA]</span> <span class="log-action" style="color:#10b981;">Consola limpiada</span></div>';

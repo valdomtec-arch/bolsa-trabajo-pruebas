@@ -9,7 +9,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- LIBRERÍA DE GRÁFICOS (Chart.js) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style> 
+<style>
+/* ESTILOS EXTRA PESTAÑA 1 PREMIUM */
+#empIdInput::placeholder { text-transform: none; opacity: 0.6; }
+#btnActualizarEmpresa, #btnCancelarEdicionEmpresa { width: 100%; padding: 12px; font-size: 1rem; border-radius: 8px; border:none; font-weight:700; }
+#btnCancelarEdicionEmpresa { background: var(--red-danger); color:white; }
+#btnCancelarEdicionEmpresa:hover { background: #dc2626; transform: translateY(-1px); }
+.empresas-table td img { background: white; padding: 3px; } 
 :root { 
 --primary-orange: #ff6600; 
 --secondary-blue: #0f2a4a; 
@@ -526,97 +532,156 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     <button class="tab-btn" data-tab="tabSistemaLogs"><i class="fas fa-terminal"></i> 6. Log del Sistema</button>
   </div>
 
-  <!-- PESTAÑA 1 - REGISTRAR EMPRESA -->
-  <div id="tabPrincipal" class="tab-content active">
-    <div class="form-admin">
-      <div class="section-divider"><i class="fas fa-file-invoice"></i> Datos Generales de la Empresa</div>
-      
-      <div class="form-group">
-        <label for="empIdInput"><i class="fas fa-id-card"></i> ID Único de Empresa</label>
-        <input type="text" id="empIdInput" placeholder="Ej: FIMEX, SORIANA, TOPBAND...">
-      </div>
-      
-      <div class="form-group">
-        <label for="empNombreInput"><i class="fas fa-signature"></i> Nombre Comercial de la Empresa</label>
-        <input type="text" id="empNombreInput" placeholder="Ej: Soriana Centro">
-      </div>
-      
-      <div class="form-group">
-        <label for="empLogoInput"><i class="fas fa-image"></i> URL del Logo Corporativo</label>
-        <input type="url" id="empLogoInput" placeholder="https://ejemplo.com/logo.png">
-      </div>
-      
-      <div class="form-group">
-        <label for="empColorInput"><i class="fas fa-palette"></i> Color Hexadecimal del Tema</label>
-        <input type="color" id="empColorInput" value="#ff6600" style="padding:4px; height:43px;">
-      </div>
+ <!-- ============================================================
+     PESTAÑA 1 REDISEÑADA: API KEY + GESTIÓN DE EMPRESAS PREMIUM
+     VERSIÓN CORREGIDA 1.1 · SIN ERRORES
+     ============================================================ -->
+<div id="tabPrincipal" class="tab-content active">
 
-      <div class="section-divider"><i class="fas fa-bullhorn"></i> Configuración del Banner y WhatsApp de Enlace</div>
-      
-      <div class="form-group full-width">
-        <label for="empBannerInput"><i class="fas fa-images"></i> URL de Imagen de Banner Publicitario</label>
-        <input type="url" id="empBannerInput" placeholder="https://ejemplo.com/banner.png">
-      </div>
-      
-      <div class="form-group">
-        <label for="empWaContactoInput"><i class="fab fa-whatsapp"></i> Número de WhatsApp del Reclutador (10 dígitos)</label>
-        <input type="tel" id="empWaContactoInput" placeholder="Ej: 8112345678">
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="empMsgPredefinidoInput"><i class="fas fa-comment-alt"></i> Mensaje Predeterminado de Entrada por WhatsApp</label>
-        <textarea id="empMsgPredefinidoInput" placeholder="Hola, me interesa la vacante..."></textarea>
-      </div>
-
-      <div class="section-divider"><i class="fas fa-info-circle"></i> Textos Informativos de la Landing Page</div>
-      
-      <div class="form-group full-width">
-        <label for="empTextoBienvenidaInput"><i class="fas fa-heading"></i> Mensaje de Bienvenida Principal</label>
-        <input type="text" id="empTextoBienvenidaInput" placeholder="¡Te esperamos! Conectando con el mejor talento.">
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="empRequisitosInput"><i class="fas fa-list-ul"></i> Requisitos Obligatorios del Perfil</label>
-        <textarea id="empRequisitosInput" placeholder="• Edad: Mayor de edad&#10;• Papelería básica completa"></textarea>
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="empBeneficiosInput"><i class="fas fa-gift"></i> Prestaciones y Beneficios Ofrecidos</label>
-        <textarea id="empBeneficiosInput" placeholder="• Sueldo semanal garantizado&#10;• Vales de despensa"></textarea>
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="empDocumentacionInput"><i class="fas fa-folder-open"></i> Documentación Necesaria</label>
-        <textarea id="empDocumentacionInput" placeholder="• Acta de nacimiento&#10;• Comprobante de domicilio"></textarea>
-      </div>
-
-      <div class="dual-buttons-layout">
-        <button id="btnGuardarEmpresa" class="btn-add"><i class="fas fa-save"></i> Guardar Nueva Empresa</button>
-        <button id="btnActualizarEmpresa" class="btn-update-final" style="display:none;"><i class="fas fa-edit"></i> Guardar Cambios</button>
-        <button id="btnCancelarEdicionEmpresa" class="btn-delete-mode" style="display:none; padding:12px; font-size:1rem; width:100%;"><i class="fas fa-times"></i> Cancelar</button>
+  <!-- 🔑 SECCIÓN 1: API KEY MAESTRA (CONTROL DE TODO EL SITIO) -->
+  <div class="form-admin" style="border-left: 4px solid var(--primary-orange); margin-bottom: 28px;">
+    <div class="section-divider" style="margin-top:0; border:none; padding:0;">
+      <i class="fas fa-key"></i> CONFIGURACIÓN PRINCIPAL · API KEY GEMINI (MAESTRA)
+    </div>
+    <p style="grid-column:1/-1; color:var(--text-muted); font-size:0.88rem; margin:-8px 0 12px 0;">
+      ⚠️ Esta clave controla <strong style="color:var(--primary-orange)">TODA la operación del sistema</strong>, IA, conexiones y permisos. Guárdala en lugar seguro.
+    </p>
+    
+    <div class="form-group" style="grid-column: 1 / -1;">
+      <label for="geminiApiKeyInput"><i class="fas fa-shield-halved"></i> Clave API de Google Gemini</label>
+      <div style="position:relative;">
+        <input type="password" id="geminiApiKeyInput" placeholder="Pega aquí tu API Key: AIzaSy..." 
+               style="padding-right: 110px; font-family: 'Courier New', monospace; letter-spacing: 0.5px;">
+        <button type="button" id="toggleApiKey" 
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%); 
+                       background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px 10px;">
+          <i class="fas fa-eye"></i>
+        </button>
       </div>
     </div>
 
+    <div style="grid-column:1/-1; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <button type="button" id="btnConectarApiKey" class="btn-add" style="max-width:260px;">
+        <i class="fas fa-plug"></i> Conectar / Guardar Clave
+      </button>
+      <button type="button" id="btnProbarConexion" class="btn-update-final" style="max-width:260px;">
+        <i class="fas fa-satellite-dish"></i> Probar Conexión Firebase
+      </button>
+      <span id="estadoConexionApi" style="font-size:0.85rem; color:var(--text-muted);">
+        <i class="fas fa-circle" style="color:#64748b; font-size:0.6rem;"></i> Sin conectar
+      </span>
+    </div>
+  </div>
+
+  <!-- 🏢 SECCIÓN 2: GESTIÓN DE EMPRESAS (FORMULARIO 2 COLUMNAS) -->
+  <div class="form-admin" style="border-left: 4px solid var(--blue-update);">
+    <div class="section-divider" style="margin-top:0; border:none; padding:0; color:var(--blue-update);">
+      <i class="fas fa-building"></i> GESTIÓN DE EMPRESAS · ALTA / EDICIÓN / BAJA
+    </div>
+
+    <!-- COLUMNA IZQUIERDA: DATOS PRINCIPALES -->
+    <div class="form-group">
+      <label for="empIdInput"><i class="fas fa-fingerprint"></i> ID Único de Empresa *</label>
+      <input type="text" id="empIdInput" placeholder="Ej: GLOVISCC, SORIANA, ARCOIRIS" 
+             style="text-transform:uppercase; font-weight:600;">
+    </div>
+
+    <div class="form-group">
+      <label for="empNombreInput"><i class="fas fa-signature"></i> Nombre Comercial *</label>
+      <input type="text" id="empNombreInput" placeholder="Ej: Hyundai Glovis Consolidation Center">
+    </div>
+
+    <div class="form-group">
+      <label for="empTagsInput"><i class="fas fa-tags"></i> Etiquetas / TAG</label>
+      <input type="text" id="empTagsInput" placeholder="Ej: Manufactura, Logística, Tlajomulco, Noche">
+    </div>
+
+    <div class="form-group">
+      <label for="empUbicacionInput"><i class="fas fa-location-dot"></i> Ubicación Base *</label>
+      <input type="text" id="empUbicacionInput" placeholder="Ej: Tlajomulco - Guadalajara, Jalisco">
+    </div>
+
+    <div class="form-group" style="grid-column: 1 / -1;">
+      <label for="empLogoInput"><i class="fas fa-image"></i> URL del Logo Corporativo</label>
+      <input type="url" id="empLogoInput" placeholder="https://ejemplo.com/logo-empresa.png">
+    </div>
+
+    <!-- ENLACE GITHUB AUTO-GENERADO (NO EDITABLE, SOLO LECTURA + COPIAR) -->
+    <div class="form-group full-width" style="background: #051612; border:1px dashed var(--green-success); 
+                                               border-radius:10px; padding:14px; margin-top:6px;">
+      <label style="color:var(--green-success);"><i class="fab fa-github"></i> Enlace Público de Vacantes (AUTO-GENERADO)</label>
+      <div style="display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap;">
+        <code id="empLinkGithub" 
+              style="flex:1; min-width:280px; background:#020617; color:#34d399; padding:12px 14px; 
+                     border-radius:8px; font-size:0.85rem; word-break:break-all; border:1px solid #0f3d2e;">
+          https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=<span id="idEmpresaSpan" style="color:var(--primary-orange); font-weight:bold;">{ID_EMPRESA}</span>
+        </code>
+        <button type="button" id="btnCopiarLink" class="btn-ia" 
+                style="background:var(--green-success); margin:0; white-space:nowrap;">
+          <i class="fas fa-copy"></i> Copiar
+        </button>
+        <a id="btnAbrirLink" href="#" target="_blank" class="btn-wa-premium" 
+           style="background:#0ea5e9; box-shadow:0 0 10px rgba(14,165,233,0.4); text-decoration:none;">
+          <i class="fas fa-external-link-alt"></i> Abrir
+        </a>
+      </div>
+      <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+        ✅ Este enlace se <strong>actualiza SOLO</strong> con el ID de empresa que escribas arriba. Es el link público que compartes.
+      </p>
+    </div>
+
+    <!-- BOTONES DE ACCIÓN: 3 NORMALES + 2 DE EDICIÓN (OCULTOS) -->
+    <div class="dual-buttons-layout" id="layoutBotonesEmpresa" style="grid-template-columns: repeat(3, 1fr); margin-top:14px;">
+      <!-- MODO NUEVA EMPRESA -->
+      <button type="button" id="btnGuardarEmpresa" class="btn-add">
+        <i class="fas fa-cloud-upload-alt"></i> Guardar Empresa
+      </button>
+      <button type="button" id="btnLimpiarFormEmpresa" class="btn-update-final">
+        <i class="fas fa-eraser"></i> Limpiar Formulario
+      </button>
+      <button type="button" id="btnBorrarIdEmpresa" class="btn-delete-mode">
+        <i class="fas fa-trash-alt"></i> Borrar / Eliminar ID
+      </button>
+      <!-- MODO EDICIÓN (OCULTOS POR DEFECTO) -->
+      <button type="button" id="btnActualizarEmpresa" class="btn-update-final" style="display:none; background:#10b981;">
+        <i class="fas fa-sync-alt"></i> Guardar Cambios
+      </button>
+      <button type="button" id="btnCancelarEdicionEmpresa" class="btn-delete-mode" style="display:none;">
+        <i class="fas fa-times"></i> Cancelar Edición
+      </button>
+    </div>
+  </div>
+
+  <!-- 🔎 BUSCADOR + TABLA DE EMPRESAS REGISTRADAS -->
+  <div style="margin-top:28px;">
     <div class="search-container">
       <i class="fas fa-search" style="color: var(--text-muted);"></i>
-      <input type="text" id="buscarEmpresaInput" placeholder="Buscar empresa por nombre o ID...">
+      <input type="text" id="buscarEmpresaInput" placeholder="Buscar empresa por ID, Nombre, Tags o Ubicación...">
+      <span style="color:var(--text-muted); font-size:0.8rem; white-space:nowrap;">
+        <i class="fas fa-building"></i> <span id="contadorEmpresas">0</span> registradas
+      </span>
     </div>
 
     <div style="overflow-x: auto;">
       <table class="empresas-table" id="tablaEmpresas">
         <thead>
           <tr>
-            <th>Logo</th>
+            <th style="width:70px;">Logo</th>
             <th>ID</th>
             <th>Nombre Comercial</th>
-            <th>Mensaje Bienvenida</th>
-            <th>Acciones</th>
+            <th>Ubicación</th>
+            <th>Tags</th>
+            <th style="width:100px;">Enlace</th>
+            <th style="width:140px;">Acciones</th>
           </tr>
         </thead>
         <tbody id="tbodyEmpresas"></tbody>
       </table>
     </div>
   </div>
+
+</div>
+<!-- FIN PESTAÑA 1 CORREGIDA -->
 
   <!-- PESTAÑA 2 - CONTROL DE VACANTES E IA -->
   <div id="tabSecundarias" class="tab-content"> 
@@ -1002,9 +1067,9 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"; 
+import { getDatabase, ref, onValue, set, update, remove, get } from 
+"https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 // VARIABLES DE ESTADO LOCAL GLOBAL
 let db;
 let listaEmpresasGlobal = [];
@@ -1835,6 +1900,303 @@ document.addEventListener("DOMContentLoaded", () => {
       registrarLogSistema("Postulantes", `Expediente actualizado: ${id}`);
     });
   });
+});
+/* ============================================================
+   FUNCIONES PESTAÑA 1 · VERSIÓN CORREGIDA 1.1
+   100% compatibles con datos antiguos y nuevos
+   ============================================================ */
+const BASE_URL_GITHUB = 'https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=';
+
+// --- AUTO-GENERAR ENLACE GITHUB MIENTRAS ESCRIBES EL ID ---
+function actualizarEnlaceGithub() {
+  const inputId = document.getElementById('empIdInput');
+  const spanId = document.getElementById('idEmpresaSpan');
+  const btnAbrir = document.getElementById('btnAbrirLink');
+  const id = inputId.value.trim().toUpperCase();
+  
+  if (id) {
+    spanId.textContent = id;
+    btnAbrir.href = BASE_URL_GITHUB + id;
+  } else {
+    spanId.textContent = '{ID_EMPRESA}';
+    btnAbrir.href = '#';
+  }
+}
+
+// --- OBTENER DATOS DEL FORMULARIO (NUEVA ESTRUCTURA) ---
+function obtenerDatosFormularioEmpresa() {
+  const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+  return {
+    id: id,
+    nombre: document.getElementById('empNombreInput').value.trim(),
+    tags: document.getElementById('empTagsInput').value.trim(),
+    ubicacion: document.getElementById('empUbicacionInput').value.trim(),
+    imagen: document.getElementById('empLogoInput').value.trim(),
+    link: BASE_URL_GITHUB + id
+  };
+}
+
+// --- VALIDAR CAMPOS OBLIGATORIOS ---
+function validarFormEmpresa() {
+  const id = document.getElementById('empIdInput').value.trim();
+  const nombre = document.getElementById('empNombreInput').value.trim();
+  const ubicacion = document.getElementById('empUbicacionInput').value.trim();
+  
+  if (!id) { alert('❌ El ID de empresa es OBLIGATORIO'); return false; }
+  if (!nombre) { alert('❌ El Nombre Comercial es OBLIGATORIO'); return false; }
+  if (!ubicacion) { alert('❌ La Ubicación Base es OBLIGATORIA'); return false; }
+  return true;
+}
+
+// --- CAMBIAR A MODO EDICIÓN / MODO NUEVO ---
+function cambiarModoBotones(modo) {
+  const btnGuardar = document.getElementById('btnGuardarEmpresa');
+  const btnLimpiar = document.getElementById('btnLimpiarFormEmpresa');
+  const btnBorrar = document.getElementById('btnBorrarIdEmpresa');
+  const btnActualizar = document.getElementById('btnActualizarEmpresa');
+  const btnCancelar = document.getElementById('btnCancelarEdicionEmpresa');
+  const layout = document.getElementById('layoutBotonesEmpresa');
+
+  if (modo === 'edicion') {
+    btnGuardar.style.display = 'none';
+    btnLimpiar.style.display = 'none';
+    btnBorrar.style.display = 'none';
+    btnActualizar.style.display = 'block';
+    btnCancelar.style.display = 'block';
+    layout.style.gridTemplateColumns = '1fr 1fr';
+  } else {
+    btnGuardar.style.display = 'block';
+    btnLimpiar.style.display = 'block';
+    btnBorrar.style.display = 'block';
+    btnActualizar.style.display = 'none';
+    btnCancelar.style.display = 'none';
+    layout.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  }
+}
+
+// --- RENDERIZAR TABLA EMPRESAS (COMPATIBLE DATOS NUEVOS + ANTIGUOS) ---
+window.renderizarTablaEmpresas = function() {
+  const tbody = document.getElementById('tbodyEmpresas');
+  const filtro = document.getElementById('buscarEmpresaInput').value.toLowerCase().trim();
+  const contador = document.getElementById('contadorEmpresas');
+  
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  contador.textContent = listaEmpresasGlobal.length;
+
+  const empresasFiltradas = listaEmpresasGlobal.filter(emp => {
+    // COMPATIBILIDAD: acepta campos nuevos y antiguos
+    const nombre = emp.nombre || '-';
+    const tags = emp.tags || '';
+    const ubicacion = emp.ubicacion || emp.tags || '';
+    const textoBusqueda = `${emp.idFirebase} ${nombre} ${tags} ${ubicacion}`.toLowerCase();
+    return textoBusqueda.includes(filtro);
+  });
+
+  empresasFiltradas.forEach(emp => {
+    const tr = document.createElement('tr');
+    // COMPATIBILIDAD: usa imagen si existe, si no usa logoUrl antiguo
+    const urlLogo = emp.imagen || emp.logoUrl || 'https://cdn-icons-png.flaticon.com/64/5339/5339155.png';
+    const linkVacante = emp.link || BASE_URL_GITHUB + emp.idFirebase;
+    const tagsArray = (emp.tags || '').split(',').filter(t => t.trim());
+    
+    tr.innerHTML = `
+      <td><img src="${urlLogo}" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/64/5339/5339155.png'"></td>
+      <td style="font-weight:bold; color:var(--primary-orange); font-family:'Courier New',monospace;">${emp.idFirebase}</td>
+      <td style="font-weight:600;">${emp.nombre || '-'}</td>
+      <td><i class="fas fa-map-marker-alt" style="color:#f59e0b; font-size:0.75rem;"></i> ${emp.ubicacion || '-'}</td>
+      <td style="font-size:0.78rem;">
+        ${tagsArray.length ? tagsArray.map(tag => 
+          `<span style="display:inline-block; background:#1e293b; color:#cbd5e1; 
+                       padding:2px 8px; border-radius:10px; margin:2px; border:1px solid var(--border-color);">
+             ${tag.trim()}
+           </span>`
+        ).join('') : '<span style="color:var(--text-muted);">Sin tags</span>'}
+      </td>
+      <td>
+        <a href="${linkVacante}" target="_blank" class="btn-wa-premium" 
+           style="background:#0ea5e9; box-shadow:0 0 8px rgba(14,165,233,0.3); padding:4px 10px; font-size:0.75rem;">
+          <i class="fas fa-link"></i>
+        </a>
+      </td>
+      <td>
+        <div class="actions-layout" style="margin-top:0; justify-content:flex-end;">
+          <button class="btn-edit-mode" style="padding:5px 9px; font-size:0.8rem;"
+                  onclick="window.cargarEmpresaEnEdicion('${emp.idFirebase}')">
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button class="btn-delete-mode" style="padding:5px 9px; font-size:0.8rem;"
+                  onclick="window.eliminarEmpresaSistema('${emp.idFirebase}')">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+};
+
+// --- CARGAR EMPRESA EN EDICIÓN ---
+window.cargarEmpresaEnEdicion = function(idEmpresa) {
+  const empresa = listaEmpresasGlobal.find(e => e.idFirebase === idEmpresa);
+  if (!empresa) return;
+  
+  idEmpresaEdicionActiva = idEmpresa;
+  document.getElementById('empIdInput').value = empresa.idFirebase;
+  document.getElementById('empIdInput').disabled = true;
+  document.getElementById('empNombreInput').value = empresa.nombre || "";
+  document.getElementById('empTagsInput').value = empresa.tags || "";
+  document.getElementById('empUbicacionInput').value = empresa.ubicacion || "";
+  // COMPATIBILIDAD: carga logo nuevo o antiguo
+  document.getElementById('empLogoInput').value = empresa.imagen || empresa.logoUrl || "";
+  
+  actualizarEnlaceGithub();
+  cambiarModoBotones('edicion');
+  // Subir automáticamente al formulario
+  document.getElementById('tabPrincipal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  registrarLogSistema("Empresas", `Modo edición activado: ${idEmpresa}`);
+};
+
+// --- CANCELAR EDICIÓN ---
+window.cancelarEdicionEmpresa = function() { 
+  idEmpresaEdicionActiva = null; 
+  const inputId = document.getElementById('empIdInput');
+  inputId.value = '';
+  inputId.disabled = false;
+  document.getElementById('empNombreInput').value = '';
+  document.getElementById('empTagsInput').value = '';
+  document.getElementById('empUbicacionInput').value = '';
+  document.getElementById('empLogoInput').value = '';
+  actualizarEnlaceGithub();
+  cambiarModoBotones('nuevo');
+  registrarLogSistema("Empresas", "Edición cancelada");
+};
+
+// --- EVENTOS GLOBALES DE LA PESTAÑA 1 ---
+document.addEventListener("DOMContentLoaded", () => {
+  const inputId = document.getElementById('empIdInput');
+  inputId.addEventListener('input', actualizarEnlaceGithub);
+  actualizarEnlaceGithub();
+
+  // MOSTRAR / OCULTAR API KEY
+  document.getElementById('toggleApiKey').addEventListener('click', (e) => {
+    const input = document.getElementById('geminiApiKeyInput');
+    const icon = e.currentTarget.querySelector('i');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'text' ? 'fas fa-eye-slash' : 'fas fa-eye';
+  });
+
+  // CONECTAR API KEY (mantiene lógica original + nueva)
+  const apiKeyInput = document.getElementById('geminiApiKeyInput');
+  document.getElementById('btnConectarApiKey').addEventListener('click', () => {
+    const clave = apiKeyInput.value.trim();
+    if (!clave) return alert('❌ Pega tu API Key primero');
+    localStorage.setItem('apiKeyGemini', clave);
+    conectarFirebaseConApiKey(clave);
+    document.getElementById('estadoConexionApi').innerHTML = 
+      '<i class="fas fa-circle-notch fa-spin" style="color:#f59e0b;"></i> Conectando...';
+  });
+  // Evento original de cambio automático
+  apiKeyInput.addEventListener('change', () => {
+    if (apiKeyInput.value.trim()) conectarFirebaseConApiKey(apiKeyInput.value.trim());
+  });
+  // Cargar clave guardada al iniciar
+  const claveGuardada = localStorage.getItem('apiKeyGemini');
+  if (claveGuardada) {
+    apiKeyInput.value = claveGuardada;
+    conectarFirebaseConApiKey(claveGuardada);
+  }
+
+  // COPIAR ENLACE GITHUB
+  document.getElementById('btnCopiarLink').addEventListener('click', async () => {
+    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+    if (!id) return alert('❌ Primero escribe un ID de empresa');
+    const url = BASE_URL_GITHUB + id;
+    try {
+      await navigator.clipboard.writeText(url);
+      const btn = document.getElementById('btnCopiarLink');
+      const txtOriginal = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+      setTimeout(() => btn.innerHTML = txtOriginal, 1800);
+    } catch (err) { alert('Error al copiar: ' + err.message); }
+  });
+
+  // BOTÓN LIMPIAR
+  document.getElementById('btnLimpiarFormEmpresa').addEventListener('click', () => {
+    if (!confirm('¿Limpiar todo el formulario?')) return;
+    window.cancelarEdicionEmpresa();
+  });
+
+  // BOTÓN BORRAR ID (acción rápida)
+  document.getElementById('btnBorrarIdEmpresa').addEventListener('click', () => {
+    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+    if (!id) return alert('❌ Escribe o carga un ID primero');
+    if (!confirm(`⚠️ ¿ELIMINAR "${id}" PERMANENTEMENTE?\n\nEsto NO borra vacantes ni postulantes.`)) return;
+    
+    if (db) {
+      remove(ref(db, `empresas/${id}`)).then(() => {
+        registrarLogSistema("🔥 BAJA EMPRESA", `Eliminada: ${id}`);
+        window.cancelarEdicionEmpresa();
+      });
+    }
+  });
+
+  // BOTÓN GUARDAR NUEVA EMPRESA
+  document.getElementById('btnGuardarEmpresa').addEventListener('click', async () => {
+    if (!validarFormEmpresa()) return;
+    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+    
+    // Evitar sobreescribir sin aviso
+    if (db) {
+      const snap = await get(ref(db, `empresas/${id}`));
+      if (snap.exists()) {
+        if (!confirm(`⚠️ El ID "${id}" YA EXISTE.\n¿Sobreescribir con datos nuevos?`)) return;
+      }
+    }
+
+    const datos = obtenerDatosFormularioEmpresa();
+    if (db) {
+      set(ref(db, `empresas/${id}`), datos).then(() => {
+        registrarLogSistema("✅ NUEVA EMPRESA", `Registrada: ${id} - ${datos.nombre}`);
+        window.cancelarEdicionEmpresa();
+      });
+    }
+  });
+
+  // BOTÓN ACTUALIZAR (MODO EDICIÓN)
+  document.getElementById('btnActualizarEmpresa').addEventListener('click', () => {
+    if (!validarFormEmpresa() || !idEmpresaEdicionActiva || !db) return;
+    const datos = obtenerDatosFormularioEmpresa();
+    
+    update(ref(db, `empresas/${idEmpresaEdicionActiva}`), datos).then(() => {
+      registrarLogSistema("✏️ EMPRESA ACTUALIZADA", `Modificada: ${idEmpresaEdicionActiva}`);
+      window.cancelarEdicionEmpresa();
+    });
+  });
+
+  // BOTÓN CANCELAR EDICIÓN
+  document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', window.cancelarEdicionEmpresa);
+
+  // PROBAR CONEXIÓN FIREBASE
+  document.getElementById('btnProbarConexion').addEventListener('click', async () => {
+    const estado = document.getElementById('estadoConexionApi');
+    estado.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="color:#f59e0b;"></i> Probando...';
+    
+    if (!db) {
+      setTimeout(() => estado.innerHTML = '<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Sin BD inicializada', 800);
+      return;
+    }
+    try {
+      await get(ref(db, 'empresas'));
+      estado.innerHTML = '<i class="fas fa-circle-check" style="color:#10b981;"></i> ✅ Firebase CONECTADO';
+      registrarLogSistema("Sistema", "Conexión verificada OK");
+    } catch (err) {
+      estado.innerHTML = `<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> ❌ Error: ${err.message}`;
+    }
+  });
+
+  // BUSCADOR EMPRESAS (mantener evento original)
+  document.getElementById('buscarEmpresaInput').addEventListener('input', window.renderizarTablaEmpresas);
 });
 </script>
 </body> 

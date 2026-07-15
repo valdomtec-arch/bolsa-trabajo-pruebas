@@ -422,7 +422,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
       
       <div class="form-group">
-        <label for="empWaContactoInput"><i class="fab fa-whatsapp"></i> Número de WhatsApp del Recrutador (10 dígitos)</label>
+        <label for="empWaContactoInput"><i class="fab fa-whatsapp"></i> Número de WhatsApp del Reclutador (10 dígitos)</label>
         <input type="tel" id="empWaContactoInput" placeholder="Ej: 8112345678">
       </div>
       
@@ -474,7 +474,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
             <th>Logo</th>
             <th>ID</th>
             <th>Nombre Comercial</th>
-            <th>WhatsApp Enlace</th>
+            <th>Mensaje Bienvenida</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -866,7 +866,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 </div> <!-- CIERRE DE .admin-container -->
 
 <!-- INICIALIZACIÓN DE FIREBASE, VARIABLES GLOBALES Y LÓGICA CONSOLIDADA -->
-<!-- INICIALIZACIÓN DE FIREBASE, VARIABLES GLOBALES Y LÓGICA CONSOLIDADA (CORREGIDO) -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -970,7 +969,7 @@ function conectarFirebaseConApiKey(apiKey) {
     const firebaseConfig = {
       apiKey: apiKey,
       authDomain: "bolsa-trabajo-a52e4.firebaseapp.com",
-      databaseURL: "https://bolsa-de-trabajo-a52e4-default-rtdb.firebaseio.com", // URL CORREGIDA
+      databaseURL: "https://bolsa-de-trabajo-a52e4-default-rtdb.firebaseio.com",
       projectId: "bolsa-trabajo-a52e4",
       storageBucket: "bolsa-trabajo-a52e4.appspot.com",
       messagingSenderId: "103248576912",
@@ -994,7 +993,6 @@ function registrarLogSistema(modulo, accion) {
 
   const ahora = new Date();
   const horaFormateada = ahora.toLocaleTimeString('es-MX', { hour12: false });
-  const fechaFormateada = coder => ahora.toLocaleDateString('es-MX');
   const timestamp = `[${ahora.toLocaleDateString('es-MX')} ${horaFormateada}]`;
 
   const logItem = document.createElement('div');
@@ -1026,7 +1024,7 @@ function escucharNodosFirebase() {
     window.actualizarSelectoresEmpresa();
   });
 
-  // 2. Escuchar Vacantes (Estructura Corregida: vacantes_detalles/[empresaId]/[puestoId])
+  // 2. Escuchar Vacantes
   onValue(ref(db, 'vacantes_detalles'), (snapshot) => {
     listaVacantesGlobal = [];
     if (snapshot.exists()) {
@@ -1035,7 +1033,7 @@ function escucharNodosFirebase() {
         const puestos = empresasVacantes[empresaKey];
         for (let puestoKey in puestos) {
           listaVacantesGlobal.push({
-            idFirebase: `${empresaKey}/${puestoKey}`, // Conservamos la ruta relativa estructurada
+            idFirebase: `${empresaKey}/${puestoKey}`,
             empresaMatriz: empresaKey,
             idClave: puestoKey,
             ...puestos[puestoKey]
@@ -1057,14 +1055,14 @@ function escucharNodosFirebase() {
     window.actualizarSelectoresReclutadores();
   });
 
-  // 4. Escuchar Postulantes (Mapeo de IDs automático de Firebase corregido)
+  // 4. Escuchar Postulantes
   onValue(ref(db, 'postulantes'), (snapshot) => {
     listaPostulantesGlobal = [];
     if (snapshot.exists()) {
       const datos = snapshot.val();
       for (let key in datos) { 
         listaPostulantesGlobal.push({ 
-          idFirebase: key, // Aquí guardamos el ID automático de Firebase (-Ovk...)
+          idFirebase: key,
           ...datos[key] 
         }); 
       }
@@ -1074,21 +1072,36 @@ function escucharNodosFirebase() {
   });
 }
 
-// GESTIÓN EMPRESAS
+// GESTIÓN EMPRESAS (Pestaña 1 - Datos Corporativos Puros)
 function obtenerDatosFormularioEmpresa() {
   return {
     nombre: document.getElementById('empNombreInput').value.trim(),
     logoUrl: document.getElementById('empLogoInput').value.trim() || "https://via.placeholder.com/150",
     colorTema: document.getElementById('empColorInput').value,
     bannerUrl: document.getElementById('empBannerInput').value.trim(),
-    whatsappContacto: document.getElementById('empWaContactoInput').value.trim(),
-    mensajePredefinido: document.getElementById('empMsgPredefinidoInput').value.trim(),
+    waContacto: document.getElementById('empWaContactoInput').value.trim(),
+    msgPredefinido: document.getElementById('empMsgPredefinidoInput').value.trim(),
     textoBienvenida: document.getElementById('empTextoBienvenidaInput').value.trim() || "¡Te esperamos!",
     requisitos: document.getElementById('empRequisitosInput').value.trim(),
     beneficios: document.getElementById('empBeneficiosInput').value.trim(),
     documentacion: document.getElementById('empDocumentacionInput').value.trim()
   };
 }
+
+window.limpiarFormularioEmpresa = function() {
+  document.getElementById('empIdInput').value = "";
+  document.getElementById('empIdInput').disabled = false;
+  document.getElementById('empNombreInput').value = "";
+  document.getElementById('empLogoInput').value = "";
+  document.getElementById('empColorInput').value = "#ff6600";
+  document.getElementById('empBannerInput').value = "";
+  document.getElementById('empWaContactoInput').value = "";
+  document.getElementById('empMsgPredefinidoInput').value = "";
+  document.getElementById('empTextoBienvenidaInput').value = "";
+  document.getElementById('empRequisitosInput').value = "";
+  document.getElementById('empBeneficiosInput').value = "";
+  document.getElementById('empDocumentacionInput').value = "";
+};
 
 window.renderizarTablaEmpresas = function() {
   const tbody = document.getElementById('tbodyEmpresas');
@@ -1101,10 +1114,10 @@ window.renderizarTablaEmpresas = function() {
   ).forEach(emp => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><img src="${emp.logoUrl}" alt="Logo"></td>
+      <td><img src="${emp.logoUrl}" alt="Logo" style="width:40px; height:40px; object-fit:contain; border-radius:4px;"></td>
       <td style="font-weight:bold; color:var(--primary-orange);">${emp.idFirebase}</td>
       <td>${emp.nombre || '—'}</td>
-      <td><i class="fab fa-whatsapp" style="color:var(--green-whatsapp)"></i> ${emp.whatsappContacto || '—'}</td>
+      <td style="color:#a8a29e; font-style:italic;">"${emp.textoBienvenida || '¡Te esperamos!'}"</td>
       <td>
         <div class="actions-layout" style="margin-top:0;">
           <button class="btn-edit-mode" style="padding:5px 10px;" onclick="window.cargarEmpresaEnEdicion('${emp.idFirebase}')"><i class="fas fa-edit"></i></button>
@@ -1127,8 +1140,8 @@ window.cargarEmpresaEnEdicion = function(idEmpresa) {
   document.getElementById('empLogoInput').value = empresa.logoUrl || "";
   document.getElementById('empColorInput').value = empresa.colorTema || "#ff6600";
   document.getElementById('empBannerInput').value = empresa.bannerUrl || "";
-  document.getElementById('empWaContactoInput').value = empresa.whatsappContacto || "";
-  document.getElementById('empMsgPredefinidoInput').value = empresa.mensajePredefinido || "";
+  document.getElementById('empWaContactoInput').value = empresa.waContacto || "";
+  document.getElementById('empMsgPredefinidoInput').value = empresa.msgPredefinido || "";
   document.getElementById('empTextoBienvenidaInput').value = empresa.textoBienvenida || "";
   document.getElementById('empRequisitosInput').value = empresa.requisitos || "";
   document.getElementById('empBeneficiosInput').value = empresa.beneficios || "";
@@ -1162,30 +1175,15 @@ window.actualizarSelectoresEmpresa = function() {
   selectVacantesTab.value = valorGuardado;
 };
 
-function limpiarFormularioEmpresa() {
-  document.getElementById('empIdInput').value = "";
-  document.getElementById('empIdInput').disabled = false;
-  document.getElementById('empNombreInput').value = "";
-  document.getElementById('empLogoInput').value = "";
-  document.getElementById('empColorInput').value = "#ff6600";
-  document.getElementById('empBannerInput').value = "";
-  document.getElementById('empWaContactoInput').value = "";
-  document.getElementById('empMsgPredefinidoInput').value = "";
-  document.getElementById('empTextoBienvenidaInput').value = "";
-  document.getElementById('empRequisitosInput').value = "";
-  document.getElementById('empBeneficiosInput').value = "";
-  document.getElementById('empDocumentacionInput').value = "";
-}
-
-function cancelarEdicionEmpresa() {
+window.cancelarEdicionEmpresa = function() {
   idEmpresaEdicionActiva = null;
-  limpiarFormularioEmpresa();
+  window.limpiarFormularioEmpresa();
   document.getElementById('btnGuardarEmpresa').style.display = "block";
   document.getElementById('btnActualizarEmpresa').style.display = "none";
   document.getElementById('btnCancelarEdicionEmpresa').style.display = "none";
-}
+};
 
-// GESTIÓN VACANTES (Rutas de escritura y lectura corregidas a vacantes_detalles/)
+// GESTIÓN VACANTES
 window.actualizarSelectoresVacantes = function() {
   const selectEmpresa = document.getElementById('secEmpresaSelect');
   const boxGestion = document.getElementById('boxGestionVacantes');
@@ -1203,7 +1201,7 @@ window.actualizarSelectoresVacantes = function() {
     return;
   }
   boxGestion.style.display = "block";
-  selectorVacantesFB.innerHTML = '<option value="">-- Selecciona Vacante Guardada --</option>';
+  selectorVacantesFB.innerHTML = '<option value="">-- Selecciona Vacante --</option>';
   vacantesFiltradas.forEach(vac => {
     const opt = document.createElement('option');
     opt.value = vac.idFirebase;
@@ -1249,8 +1247,8 @@ window.procesarPersistenciaVacante = function(esActualizacion) {
 
   const datosVacante = {
     idClave: idClaveVacante,
-    puestoId: idClaveVacante, // Sincronizado con tus landings
-    vacanteNombre: document.getElementById('secVacanteNombre').value.trim() || "Puesto Sin Nombre", // Mapeo de nombre corregido
+    puestoId: idClaveVacante,
+    vacanteNombre: document.getElementById('secVacanteNombre').value.trim() || "Puesto Sin Nombre",
     nombreVacante: document.getElementById('secVacanteNombre').value.trim() || "Puesto Sin Nombre",
     estatus: document.getElementById('secEstatus').value,
     bannerUrl: document.getElementById('secBannerUrl').value.trim(),
@@ -1269,7 +1267,6 @@ window.procesarPersistenciaVacante = function(esActualizacion) {
   };
 
   if (db) {
-    // RUTA HISTÓRICA CORREGIDA: vacantes_detalles/[idEmpresa]/[idClave]
     const nodoRuta = `vacantes_detalles/${idEmpresa}/${idClaveVacante}`;
     if (esActualizacion) {
       update(ref(db, nodoRuta), datosVacante).then(() => {
@@ -1395,8 +1392,6 @@ window.procesarGuardadoLoteConDecision = async function() {
   if (!vacanteIa || !vacanteIa.idClave) return alert("El JSON no posee un idClave válido.");
 
   const idClaveLimpio = vacanteIa.idClave.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
-  
-  // RUTA CORREGIDA: vacantes_detalles/[idEmpresa]/[idClave]
   const nodoRuta = `vacantes_detalles/${idEmpresa}/${idClaveLimpio}`;
 
   try {
@@ -1463,16 +1458,19 @@ window.ejecutarEscrituraFirebaseLote = function(nodoRuta, datos, accion) {
   }).catch(err => alert("Error al persistir lote: " + err.message));
 };
 
-// POSTULANTES Y DEMOGRAFÍA
+// POSTULANTES, MÉTRICAS Y AGENDA (Pestaña 3)
 window.calcularMetricasDemograficas = function() {
   const totalCandidatos = listaPostulantesGlobal.length;
   let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
   let r1 = 0, r2 = 0, r3 = 0, r4 = 0;
 
   listaPostulantesGlobal.forEach(p => {
-    const gen = p.sexo ? p.sexo.toLowerCase() : '';
-    if (gen.includes('masc') || gen === 'm' || gen.includes('hom')) hombres++;
-    else if (gen.includes('fem') || gen === 'f' || gen.includes('muj')) mujeres++;
+    const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
+    if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') {
+      hombres++;
+    } else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') {
+      mujeres++;
+    }
 
     const edad = parseInt(p.edad, 10);
     if (!isNaN(edad)) {
@@ -1489,26 +1487,43 @@ window.calcularMetricasDemograficas = function() {
   const pctMujeres = totalCandidatos > 0 ? Math.round((mujeres / totalCandidatos) * 100) : 0;
   const promedioEdad = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
 
-  if(document.getElementById('totalPostulantesMetrica')) document.getElementById('totalPostulantesMetrica').textContent = totalCandidatos;
-  if(document.getElementById('metHombres')) document.getElementById('metHombres').textContent = `${pctHombres}%`;
-  if(document.getElementById('metMujeres')) document.getElementById('metMujeres').textContent = `${pctMujeres}%`;
-  if(document.getElementById('metPromedioEdad')) document.getElementById('metPromedioEdad').textContent = promedioEdad;
-  if(document.getElementById('porcentajeHombresMetrica')) document.getElementById('porcentajeHombresMetrica').textContent = `${pctHombres}%`;
-  if(document.getElementById('porcentajeMujeresMetrica')) document.getElementById('porcentajeMujeresMetrica').textContent = `${pctMujeres}%`;
+  const txtTotal = document.getElementById('totalPostulantesMetrica');
+  const txtHombres = document.getElementById('metHombres');
+  const txtMujeres = document.getElementById('metMujeres');
+  const txtPromedio = document.getElementById('metPromedioEdad');
 
-  if (document.getElementById('barraProgresoHombres')) document.getElementById('barraProgresoHombres').style.width = `${pctHombres}%`;
-  if (document.getElementById('barraProgresoMujeres')) document.getElementById('barraProgresoMujeres').style.width = `${pctMujeres}%`;
+  if (txtTotal) txtTotal.textContent = totalCandidatos;
+  if (txtHombres) txtHombres.textContent = `${pctHombres}%`;
+  if (txtMujeres) txtMujeres.textContent = `${pctMujeres}%`;
+  if (txtPromedio) txtPromedio.textContent = `${promedioEdad} años`;
 
-  if(document.getElementById('edadRango1')) document.getElementById('edadRango1').textContent = `${r1} cand.`;
-  if(document.getElementById('edadRango2')) document.getElementById('edadRango2').textContent = `${r2} cand.`;
-  if(document.getElementById('edadRango3')) document.getElementById('edadRango3').textContent = `${r3} cand.`;
-  if(document.getElementById('edadRango4')) document.getElementById('edadRango4').textContent = `${r4} cand.`;
+  const barraHombres = document.getElementById('barraProgresoHombres');
+  const barraMujeres = document.getElementById('barraProgresoMujeres');
+  const lblPctHombres = document.getElementById('porcentajeHombresMetrica');
+  const lblPctMujeres = document.getElementById('porcentajeMujeresMetrica');
+
+  if (barraHombres) barraHombres.style.width = `${pctHombres}%`;
+  if (barraMujeres) barraMujeres.style.width = `${pctMujeres}%`;
+  if (lblPctHombres) lblPctHombres.textContent = `${pctHombres}% (${hombres})`;
+  if (lblPctMujeres) lblPctMujeres.textContent = `${pctMujeres}% (${mujeres})`;
+
+  const lblR1 = document.getElementById('edadRango1');
+  const lblR2 = document.getElementById('edadRango2');
+  const lblR3 = document.getElementById('edadRango3');
+  const lblR4 = document.getElementById('edadRango4');
+
+  if (lblR1) lblR1.textContent = `${r1} cand. (${totalCandidatos > 0 ? Math.round((r1/totalCandidatos)*100) : 0}%)`;
+  if (lblR2) lblR2.textContent = `${r2} cand. (${totalCandidatos > 0 ? Math.round((r2/totalCandidatos)*100) : 0}%)`;
+  if (lblR3) lblR3.textContent = `${r3} cand. (${totalCandidatos > 0 ? Math.round((r3/totalCandidatos)*100) : 0}%)`;
+  if (lblR4) lblR4.textContent = `${r4} cand. (${totalCandidatos > 0 ? Math.round((r4/totalCandidatos)*100) : 0}%)`;
 };
 
-window.filtrarAgendaPorEstatus = function(estatus) {
-  filtroAgendaActual = estatus.toUpperCase();
-  const lbl = document.getElementById('lblFiltroAgendaActivo');
-  if(lbl) lbl.textContent = `Mostrando: ${estatus}`;
+window.filtrarAgendaPorEstatus = function(dia) {
+  filtroAgendaActual = dia.toUpperCase();
+  const badgeActivo = document.getElementById('lblFiltroAgendaActivo');
+  if (badgeActivo) {
+    badgeActivo.textContent = `Mostrando: ${dia === 'TODOS' ? 'Todos los postulantes' : 'Citados el día ' + dia}`;
+  }
   window.renderizarTablaPostulantes();
 };
 
@@ -1530,18 +1545,39 @@ window.renderizarTablaPostulantes = function() {
     return cumpleFiltro && cumpleBusqueda;
   }).forEach(p => {
     const tr = document.createElement('tr');
-    let badge = `<span style="color:#ff6600;">${p.estatus || 'Pendiente'}</span>`;
+    let badgeEstatus = `<span class="badge-estatus" style="background: #fed7aa; color: #ea580c; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${p.estatus || 'Pendiente'}</span>`;
+    
+    let botonWhatsapp = '';
+    if (p.telefono) {
+      const numLimpio = p.telefono.replace(/\D/g, "");
+      const mensajePredefinido = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, nos comunicamos de Bolsa de Trabajo para dar seguimiento a tu postulación...`);
+      botonWhatsapp = `
+        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-contacto" style="color: #25D366; font-size: 1.1rem; margin-right: 8px;" title="Contactar por WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      `;
+    }
+
     tr.innerHTML = `
-      <td style="font-weight:bold;">${p.nombre || '—'}</td>
-      <td>${p.telefono || '—'}</td>
-      <td>${p.empresa || p.empresaId || '—'} / ${p.vacanteInteres || '—'}</td>
-      <td>${p.edad || '—'}a (${p.sexo || '—'})</td>
-      <td>${badge} (Cita: ${p.diaEntrevista || 'Sin asignar'})</td>
+      <td style="font-weight:bold; color: #f5f5f7;">${p.nombre || '—'}</td>
       <td>
-        <div class="actions-layout" style="margin-top:0;">
-          <!-- Corregido el paso de ID dinámico de Firebase -->
-          <button class="btn-edit-mode" style="padding:4px 8px;" onclick="window.abrirEditorPostulante('${p.idFirebase}')"><i class="fas fa-user-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:4px 8px;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        <div style="display: flex; align-items: center;">
+          ${botonWhatsapp}
+          <span style="color: #a8a29e;">${p.telefono || '—'}</span>
+        </div>
+      </td>
+      <td><span style="color: var(--primary-orange); font-weight: 500;">${p.empresa || p.empresaId || '—'}</span> / ${p.vacanteInteres || '—'}</td>
+      <td style="color: #d6d3d1;">${p.edad || '—'} años (${p.sexo || '—'})</td>
+      <td>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          ${badgeEstatus}
+          <span style="font-size: 0.75rem; color: #a8a29e;"><i class="far fa-calendar-alt"></i> ${p.diaEntrevista || 'Sin agendar'} ${p.horaCita ? `a las ${p.horaCita}` : ''}</span>
+        </div>
+      </td>
+      <td>
+        <div class="actions-layout" style="margin-top:0; display: flex; gap: 6px;">
+          <button class="btn-edit-mode" style="padding:6px 10px; background: #292524; border: 1px solid #444;" onclick="window.abrirEditorPostulante('${p.idFirebase}')" title="Editar Expediente"><i class="fas fa-user-edit"></i></button>
+          <button class="btn-delete-mode" style="padding:6px 10px; background: #292524; border: 1px solid #ef444433; color: #ef4444;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
         </div>
       </td>
     `;
@@ -1553,7 +1589,7 @@ window.abrirEditorPostulante = function(id) {
   const p = listaPostulantesGlobal.find(cand => cand.idFirebase === id);
   if(!p) return;
   
-  document.getElementById('editPostulanteId').value = id; // El ID de Firebase auto-generado
+  document.getElementById('editPostulanteId').value = id;
   document.getElementById('editPostulanteEstatus').value = p.estatus || "Pendiente";
   document.getElementById('editPostulanteDia').value = p.diaEntrevista || "";
   document.getElementById('editPostulanteHora').value = p.horaCita || "";
@@ -1635,14 +1671,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnGuardarEmpresa').addEventListener('click', () => {
     const id = document.getElementById('empIdInput').value.trim().toUpperCase();
     if(!id) return alert("ID Requerido");
-    if(db) set(ref(db, `empresas/${id}`), obtenerDatosFormularioEmpresa()).then(() => limpiarFormularioEmpresa());
+    if(db) set(ref(db, `empresas/${id}`), obtenerDatosFormularioEmpresa()).then(() => window.limpiarFormularioEmpresa());
   });
 
   document.getElementById('btnActualizarEmpresa').addEventListener('click', () => {
-    if(db && idEmpresaEdicionActiva) update(ref(db, `empresas/${idEmpresaEdicionActiva}`), obtenerDatosFormularioEmpresa()).then(() => cancelarEdicionEmpresa());
+    if(db && idEmpresaEdicionActiva) update(ref(db, `empresas/${idEmpresaEdicionActiva}`), obtenerDatosFormularioEmpresa()).then(() => window.cancelarEdicionEmpresa());
   });
 
-  document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', cancelarEdicionEmpresa);
+  document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', window.cancelarEdicionEmpresa);
   document.getElementById('buscarEmpresaInput').addEventListener('input', () => window.renderizarTablaEmpresas());
   
   document.getElementById('btnGuardarNuevaVacante').addEventListener('click', () => window.procesarPersistenciaVacante(false));
@@ -1668,7 +1704,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnBorrarVacanteWeb').addEventListener('click', () => {
     const val = document.getElementById('selectorVacantesEnFirebase').value;
     if(val && confirm("¿Eliminar vacante permanentemente de Firebase?")) {
-      // Ruta de eliminación corregida
       remove(ref(db, `vacantes_detalles/${val}`)).then(() => window.limpiarFormularioVacante());
     }
   });
@@ -1683,7 +1718,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnGuardarCambiosPostulante').addEventListener('click', () => {
     const id = document.getElementById('editPostulanteId').value;
     if(db && id) {
-      // Escritura corregida en el ID autogenerado de Firebase
       update(ref(db, `postulantes/${id}`), {
         estatus: document.getElementById('editPostulanteEstatus').value,
         diaEntrevista: document.getElementById('editPostulanteDia').value,

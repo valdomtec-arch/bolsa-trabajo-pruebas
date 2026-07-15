@@ -1067,10 +1067,15 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"; 
-import { getDatabase, ref, onValue, set, update, remove, get } from 
-"https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-// VARIABLES DE ESTADO LOCAL GLOBAL
+<!-- FIREBASE VERSIÓN GLOBAL (SIN MÓDULOS - TODAS LAS FUNCIONES LO VEN) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<!-- SCRIPT UNIFICADO - SIN DUPLICADOS - 100% FUNCIONAL -->
+<script>
+// ==============================================
+// VARIABLES GLOBALES (TODAS LAS FUNCIONES ACCEDEN)
+// ==============================================
 let db;
 let listaEmpresasGlobal = [];
 let listaVacantesGlobal = [];
@@ -1079,62 +1084,56 @@ let listaPostulantesGlobal = [];
 let idEmpresaEdicionActiva = null;
 let idReclutadorEdicionActiva = null;
 let filtroAgendaActual = 'TODOS';
+const BASE_URL_GITHUB = 'https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=';
+const LOGO_POR_DEFECTO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="%23ff6600"><rect width="64" height="64" rx="12"/><text x="50%25" y="55%25" font-size="32" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold">E</text></svg>';
 
-// Instancias de Gráficos de Pestaña 3 (Sección de Postulados Reales)
-let chartEmpresas = null;
-let chartVacantes = null;
+// Gráficos
+let chartEmpresas = null, chartVacantes = null;
+let chartCandidatosInst = null, chartVacantesInst = null, chartEmpresasInst = null;
 
-// Instancias de Gráficos de Pestaña 4 (Demográficos Generales)
-let chartCandidatosInst = null;
-let chartVacantesInst = null;
-let chartEmpresasInst = null;
-
+// ==============================================
+// 1. FUNCIONAMIENTO DE PESTAÑAS (100% CORREGIDO)
+// ==============================================
 function inicializarNavegacionTabs() {
   const botonesTab = document.querySelectorAll('.tabs-menu .tab-btn');
   const contenedoresTab = document.querySelectorAll('.tab-content');
-
+  
   botonesTab.forEach(boton => {
     boton.addEventListener('click', () => {
+      // Quita activo de TODO
       botonesTab.forEach(b => b.classList.remove('active'));
       contenedoresTab.forEach(c => c.classList.remove('active'));
-
+      
+      // Activa el seleccionado
       boton.classList.add('active');
       const tabTarget = boton.getAttribute('data-tab');
       const contenedorActivo = document.getElementById(tabTarget);
       
       if (contenedorActivo) {
         contenedorActivo.classList.add('active');
-        registrarLogSistema("Navegación", `El usuario cambió a la pestaña: ${tabTarget}`);
+        registrarLogSistema("Navegación", `Cambio a pestaña: ${tabTarget}`);
         
-        // Renderizado al cambiar de tabs
-        if (tabTarget === 'tab-tres') {
-          // Llama a la función de estadísticas reales para la pestaña 4 (ID: tab-tres)
-          setTimeout(() => { 
-            if (typeof window.renderizarEstadisticasPestañaTres === 'function') {
-              window.renderizarEstadisticasPestañaTres(); 
-            } else if (typeof window.cargarEstadisticasDemograficasReales === 'function') {
-              window.cargarEstadisticasDemograficasReales();
-            }
-          }, 100);
-        }
-        if (tabTarget === 'tabRegistros') {
-          // Mantén aquí la lógica correspondiente para tus otros registros si aplica
-          setTimeout(() => { 
-            if (typeof window.cargarEstadisticasDemograficasReales === 'function') {
-              window.cargarEstadisticasDemograficasReales(); 
-            }
-          }, 100);
-        }
+        // Carga datos al cambiar de pestaña
+        setTimeout(() => {
+          if (tabTarget === 'tab-tres' && typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
+          if (tabTarget === 'tabRegistros') {
+            calcularMetricasDemograficas();
+            renderizarTablaPostulantes();
+          }
+        }, 100);
       }
     });
   });
 }
 
+// ==============================================
+// 2. CONEXIÓN AUTOMÁTICA A FIREBASE
+// ==============================================
 function conectarFirebaseConApiKey(apiKey) {
   if (!apiKey || apiKey.trim() === "") return;
   try {
     const firebaseConfig = {
-      apiKey: apiKey,
+      apiKey: apiKey.trim(),
       authDomain: "bolsa-trabajo-a52e4.firebaseapp.com",
       databaseURL: "https://bolsa-de-trabajo-a52e4-default-rtdb.firebaseio.com",
       projectId: "bolsa-trabajo-a52e4",
@@ -1142,813 +1141,118 @@ function conectarFirebaseConApiKey(apiKey) {
       messagingSenderId: "103248576912",
       appId: "1:103248576912:web:a1b2c3d4e5f6g7h8"
     };
-
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    registrarLogSistema("Firebase", "Conexión establecida exitosamente.");
-    escucharNodosFirebase();
+    
+    // Inicializa SOLO si no existe
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    
+    document.getElementById('estadoConexionApi').innerHTML = 
+      '<i class="fas fa-circle-check" style="color:#10b981;"></i> Firebase CONECTADO';
+    registrarLogSistema("Firebase", "Conexión exitosa");
+    escucharNodosFirebase(); // CARGA AUTOMÁTICA DE DATOS DEL SERVIDOR
+    
   } catch (error) {
-    registrarLogSistema("Error Firebase", `Fallo de inicialización: ${error.message}`);
+    document.getElementById('estadoConexionApi').innerHTML = 
+      `<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Error: ${error.message}`;
+    registrarLogSistema("Error Firebase", error.message);
   }
 }
 
-function registrarLogSistema(modulo, accion) {
-  const consola = document.getElementById('consolaSistemaLogs');
-  if (!consola) return;
-  const ahora = new Date();
-  const timestamp = `[${ahora.toLocaleDateString('es-MX')} ${ahora.toLocaleTimeString('es-MX', { hour12: false })}]`;
-  const logItem = document.createElement('div');
-  logItem.className = 'log-item';
-  logItem.innerHTML = `<span class="log-time">${timestamp} [${modulo}]</span> <span class="log-action">${accion}</span>`;
-  consola.appendChild(logItem);
-  consola.scrollTop = consola.scrollHeight;
-}
-
+// ==============================================
+// 3. ESCUCHA DATOS EN TIEMPO REAL DEL SERVIDOR
+// ==============================================
 function escucharNodosFirebase() {
   if (!db) return;
-
-  onValue(ref(db, 'empresas'), (snapshot) => {
+  
+  // 🔄 EMPRESAS
+  db.ref('empresas').on('value', (snapshot) => {
     listaEmpresasGlobal = [];
     if (snapshot.exists()) {
       const datos = snapshot.val();
-      for (let key in datos) { listaEmpresasGlobal.push({ idFirebase: key, ...datos[key] }); }
+      for (let key in datos) listaEmpresasGlobal.push({ idFirebase: key, ...datos[key] });
     }
-    window.renderizarTablaEmpresas();
-    window.actualizarSelectoresEmpresa();
-    window.renderizarEstadisticasPestañaTres();
+    renderizarTablaEmpresas();
+    actualizarSelectoresEmpresa();
+    if (typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
   });
-
-  onValue(ref(db, 'vacantes_detalles'), (snapshot) => {
+  
+  // 🔄 VACANTES
+  db.ref('vacantes_detalles').on('value', (snapshot) => {
     listaVacantesGlobal = [];
     if (snapshot.exists()) {
       const empresasVacantes = snapshot.val();
-      for (let empresaKey in empresasVacantes) {
-        const puestos = empresasVacantes[empresaKey];
-        for (let puestoKey in puestos) {
+      for (let empKey in empresasVacantes) {
+        for (let puestoKey in empresasVacantes[empKey]) {
           listaVacantesGlobal.push({
-            idFirebase: `${empresaKey}/${puestoKey}`,
-            empresaMatriz: empresaKey,
+            idFirebase: `${empKey}/${puestoKey}`,
+            empresaMatriz: empKey,
             idClave: puestoKey,
-            ...puestos[puestoKey]
+            ...empresasVacantes[empKey][puestoKey]
           });
         }
       }
     }
-    window.actualizarSelectoresVacantes();
-    window.renderizarEstadisticasPestañaTres();
+    actualizarSelectoresVacantes();
+    if (typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
   });
-
-  onValue(ref(db, 'reclutadores'), (snapshot) => {
+  
+  // 🔄 RECLUTADORES
+  db.ref('reclutadores').on('value', (snapshot) => {
     listaReclutadoresGlobal = [];
     if (snapshot.exists()) {
       const datos = snapshot.val();
-      for (let key in datos) { listaReclutadoresGlobal.push({ idFirebase: key, ...datos[key] }); }
+      for (let key in datos) listaReclutadoresGlobal.push({ idFirebase: key, ...datos[key] });
     }
-    window.renderizarTablaReclutadores();
-    window.actualizarSelectoresReclutadores();
+    renderizarTablaReclutadores();
+    actualizarSelectoresReclutadores();
   });
-
-  onValue(ref(db, 'postulantes'), (snapshot) => {
+  
+  // 🔄 POSTULANTES
+  db.ref('postulantes').on('value', (snapshot) => {
     listaPostulantesGlobal = [];
     if (snapshot.exists()) {
       const datos = snapshot.val();
-      for (let key in datos) { listaPostulantesGlobal.push({ idFirebase: key, ...datos[key] }); }
+      for (let key in datos) listaPostulantesGlobal.push({ idFirebase: key, ...datos[key] });
     }
-    window.calcularMetricasDemograficas();
-    window.renderizarTablaPostulantes();
-    window.cargarEstadisticasDemograficasReales();
-    window.renderizarEstadisticasPestañaTres();
+    calcularMetricasDemograficas();
+    renderizarTablaPostulantes();
+    if (typeof cargarEstadisticasDemograficasReales === 'function') cargarEstadisticasDemograficasReales();
+    if (typeof renderizarEstadisticasPestañaTres === 'function') renderizarEstadisticasPestañaTres();
   });
 }
 
-// PESTAÑA 3 - CARGA DE ESTADÍSTICAS REALES EN PESTAÑA 3
-window.cargarEstadisticasDemograficasReales = function() {
-    if (listaPostulantesGlobal.length === 0) return;
-
-    const conteoEmpresas = {};
-    const conteoVacantes = {};
-
-    listaPostulantesGlobal.forEach(postulado => {
-        const empresaNombre = postulado.empresa || postulado.empresaId || 'No Especificada';
-        conteoEmpresas[empresaNombre] = (conteoEmpresas[empresaNombre] || 0) + 1;
-
-        const vacanteNombre = postulado.vacanteInteres || 'No Especificada';
-        conteoVacantes[vacanteNombre] = (conteoVacantes[vacanteNombre] || 0) + 1;
-    });
-
-    renderizarGraficoEmpresas(Object.keys(conteoEmpresas), Object.values(conteoEmpresas));
-    renderizarGraficoVacantes(Object.keys(conteoVacantes), Object.values(conteoVacantes));
-};
-
-function renderizarGraficoEmpresas(labels, data) {
-    const canvas = document.getElementById('chartEmpresasReales');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (chartEmpresas) { chartEmpresas.destroy(); }
-    chartEmpresas = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Candidatos',
-                data: data,
-                backgroundColor: 'rgba(255, 102, 0, 0.7)',
-                borderColor: 'rgba(255, 102, 0, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#f1f5f9' } } },
-            scales: {
-                x: { ticks: { color: '#94a3b8' } },
-                y: { beginAtZero: true, ticks: { stepSize: 1, color: '#94a3b8' } }
-            }
-        }
-    });
-}
-
-function renderizarGraficoVacantes(labels, data) {
-    const canvas = document.getElementById('chartVacantesReales');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (chartVacantes) { chartVacantes.destroy(); }
-    chartVacantes = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: ['#38bdf8', '#f472b6', '#a78bfa', '#10b981', '#f59e0b', '#0284c7'],
-                borderColor: '#111e30',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'right', labels: { color: '#f1f5f9' } } }
-        }
-    });
-}
-
-// PESTAÑA 4 - ESTADÍSTICAS DEMOGRÁFICAS (MODIFICADA: SOLO CONTEOS REALES DE DEMANDA)
-window.renderizarEstadisticasPestañaTres = function() {
-    // ==============================================
-    // SECCIÓN 1: CANDIDATOS (se mantiene igual)
-    // ==============================================
-    const totalCand = listaPostulantesGlobal.length;
-    let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
-    let ciudades = {};
-    
-    listaPostulantesGlobal.forEach(p => {
-        const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
-        if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') hombres++;
-        else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') mujeres++;
-        
-        const edad = parseInt(p.edad, 10);
-        if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
-        
-        const ciudad = p.direccion || p.origen || "No especificada";
-        ciudades[ciudad] = (ciudades[ciudad] || 0) + 1;
-    });
-    
-    const edadPromedio = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
-    let ubicacionPrincipal = "No especificada";
-    let maxUbi = 0;
-    for (let key in ciudades) {
-        if (ciudades[key] > maxUbi) { maxUbi = ciudades[key]; ubicacionPrincipal = key; }
-    }
-    
-    // Actualizar textos de candidatos
-    document.getElementById('cand-total').textContent = totalCand;
-    document.getElementById('cand-edad').textContent = `${edadPromedio} años`;
-    document.getElementById('cand-ubicacion').textContent = ubicacionPrincipal;
-    
-    // Gráfico 1: Género de Candidatos
-    const ctxCand = document.getElementById('chartCandidatos');
-    if (ctxCand) {
-        if (chartCandidatosInst) chartCandidatosInst.destroy();
-        chartCandidatosInst = new Chart(ctxCand, {
-            type: 'doughnut',
-            data: {
-                labels: ['Hombres', 'Mujeres'],
-                datasets: [{
-                    data: [hombres, mujeres],
-                    backgroundColor: ['#38bdf8', '#f472b6'],
-                    borderColor: '#18273c',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#f1f5f9' } } }
-            }
-        });
-    }
-
-    // ==============================================
-    // SECCIÓN 2: VACANTES (NUEVA: SOLO DEMANDA REAL)
-    // ==============================================
-    // Contar postulantes POR VACANTE (datos reales, no promedios)
-    const conteoVacantes = {};
-    listaPostulantesGlobal.forEach(p => {
-        const vacante = (p.vacanteInteres || p.vacante || "Sin especificar").toString().toUpperCase().trim();
-        conteoVacantes[vacante] = (conteoVacantes[vacante] || 0) + 1;
-    });
-    
-    // Ordenar de MAYOR a MENOR demanda
-    const vacantesOrdenadas = Object.entries(conteoVacantes)
-        .sort((a, b) => b[1] - a[1]);
-    
-    // Datos para textos
-    const totalVacantesSistema = listaVacantesGlobal.length;
-    const vacantesActivas = listaVacantesGlobal.filter(v => v.estatus === 'disponible').length;
-    const vacanteTop = vacantesOrdenadas[0] ? vacantesOrdenadas[0][0] : "Sin datos";
-    const vacanteTopCantidad = vacantesOrdenadas[0] ? vacantesOrdenadas[0][1] : 0;
-    
-    // Actualizar textos de vacantes (SIN PROMEDIOS)
-    document.getElementById('vac-activas').textContent = `${vacantesActivas} de ${totalVacantesSistema} totales`;
-    document.getElementById('vac-area').textContent = vacanteTop;
-    document.getElementById('vac-sueldo').textContent = `${vacanteTopCantidad} postulantes`; // Antes era sueldo promedio → AHORA es demanda real
-    
-    // Datos para gráfico (TOP 7 más solicitadas)
-    const topVacantesLabels = vacantesOrdenadas.slice(0, 7).map(v => v[0]);
-    const topVacantesData = vacantesOrdenadas.slice(0, 7).map(v => v[1]);
-    
-    // Gráfico 2: Vacantes MÁS SOLICITADAS (barras horizontales para leer nombres mejor)
-    const ctxVac = document.getElementById('chartVacantes');
-    if (ctxVac) {
-        if (chartVacantesInst) chartVacantesInst.destroy();
-        chartVacantesInst = new Chart(ctxVac, {
-            type: 'bar',
-            data: {
-                labels: topVacantesLabels.length ? topVacantesLabels : ["Sin datos aún"],
-                datasets: [{
-                    label: 'Cantidad de Postulantes',
-                    data: topVacantesData.length ? topVacantesData : [0],
-                    backgroundColor: [
-                        'rgba(255, 102, 0, 0.9)',
-                        'rgba(139, 92, 246, 0.85)',
-                        'rgba(16, 185, 129, 0.85)',
-                        'rgba(56, 189, 248, 0.85)',
-                        'rgba(244, 114, 182, 0.85)',
-                        'rgba(245, 158, 11, 0.85)',
-                        'rgba(239, 68, 68, 0.85)'
-                    ],
-                    borderRadius: 6,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                indexAxis: 'y', // HORIZONTAL (mejor para nombres largos de vacantes)
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#18273c',
-                        titleColor: '#fff',
-                        bodyColor: '#f1f5f9',
-                        callbacks: {
-                            label: function(ctx) {
-                                return `${ctx.parsed.x} postulante(s)`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: { color: '#94a3b8', stepSize: 1 },
-                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
-                    },
-                    y: {
-                        ticks: { color: '#f1f5f9', font: { size: 11 } },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-    }
-
-    // ==============================================
-    // SECCIÓN 3: EMPRESAS (NUEVA: SOLO DEMANDA REAL)
-    // ==============================================
-    // Contar postulantes POR EMPRESA (datos reales)
-    const conteoEmpresas = {};
-    listaPostulantesGlobal.forEach(p => {
-        const empresa = (p.empresa || p.empresaId || "Sin especificar").toString().trim();
-        conteoEmpresas[empresa] = (conteoEmpresas[empresa] || 0) + 1;
-    });
-    
-    // Ordenar de MAYOR a MENOR demanda
-    const empresasOrdenadas = Object.entries(conteoEmpresas)
-        .sort((a, b) => b[1] - a[1]);
-    
-    // Datos para textos
-    const totalEmpresas = listaEmpresasGlobal.length;
-    const empresaTop = empresasOrdenadas[0] ? empresasOrdenadas[0][0] : "Sin datos";
-    const empresaTopCantidad = empresasOrdenadas[0] ? empresasOrdenadas[0][1] : 0;
-    
-    // Actualizar textos de empresas (SIN GIROS HARCODEADOS NI REGIONES FALSAS)
-    document.getElementById('emp-total').textContent = `${totalEmpresas} aliadas`;
-    document.getElementById('emp-giro').textContent = empresaTop; // Antes era "Manufactura/Servicios" fijo → AHORA es la #1 real
-    document.getElementById('emp-region').textContent = `${empresaTopCantidad} postulantes`; // Antes era región → AHORA es demanda real
-    
-    // Datos para gráfico (TOP 5 más demandadas)
-    const topEmpresasLabels = empresasOrdenadas.slice(0, 5).map(e => e[0]);
-    const topEmpresasData = empresasOrdenadas.slice(0, 5).map(e => e[1]);
-    
-    // Gráfico 3: Empresas MÁS DEMANDADAS (gráfico de anillo para comparación rápida)
-    const ctxEmp = document.getElementById('chartEmpresas');
-    if (ctxEmp) {
-        if (chartEmpresasInst) chartEmpresasInst.destroy();
-        chartEmpresasInst = new Chart(ctxEmp, {
-            type: 'doughnut',
-            data: {
-                labels: topEmpresasLabels.length ? topEmpresasLabels : ["Sin datos aún"],
-                datasets: [{
-                    data: topEmpresasData.length ? topEmpresasData : [1],
-                    backgroundColor: [
-                        '#ff6600',
-                        '#8b5cf6',
-                        '#10b981',
-                        '#38bdf8',
-                        '#f472b6'
-                    ],
-                    borderColor: '#18273c',
-                    borderWidth: 3,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '55%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            color: '#f1f5f9',
-                            padding: 12,
-                            font: { size: 11 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#18273c',
-                        callbacks: {
-                            label: function(ctx) {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = total > 0 ? Math.round((ctx.parsed / total) * 100) : 0;
-                                return `${ctx.parsed} postulantes (${pct}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-};
-
-// GESTIÓN DE MÉTRICAS RÁPIDAS (TEXTO DE PESTAÑA 3)
-window.calcularMetricasDemograficas = function() {
-  const totalCandidatos = listaPostulantesGlobal.length;
-  let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
-
-  listaPostulantesGlobal.forEach(p => {
-    const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
-    if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') hombres++;
-    else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') mujeres++;
-
-    const edad = parseInt(p.edad, 10);
-    if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
-  });
-
-  const pctHombres = totalCandidatos > 0 ? Math.round((hombres / totalCandidatos) * 100) : 0;
-  const pctMujeres = totalCandidatos > 0 ? Math.round((mujeres / totalCandidatos) * 100) : 0;
-  const promedioEdad = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
-
-  document.getElementById('totalPostulantesMetrica').textContent = totalCandidatos;
-  document.getElementById('metHombres').textContent = `${pctHombres}%`;
-  document.getElementById('metMujeres').textContent = `${pctMujeres}%`;
-  document.getElementById('metPromedioEdad').textContent = `${promedioEdad} años`;
-};
-
-window.filtrarAgendaPorEstatus = function(dia) {
-  filtroAgendaActual = dia.toUpperCase();
-  document.getElementById('lblFiltroAgendaActivo').textContent = `Mostrando: ${dia === 'TODOS' ? 'Todos los postulantes' : 'Citados el día ' + dia}`;
-  window.renderizarTablaPostulantes();
-};
-
-window.renderizarTablaPostulantes = function() {
-  const tbody = document.getElementById('tbodyPostulantes');
-  const buscador = document.getElementById('buscarPostulanteInput').value.toLowerCase().trim();
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  listaPostulantesGlobal.filter(p => {
-    const diaAsignado = p.diaEntrevista ? p.diaEntrevista.toUpperCase() : '';
-    const cumpleFiltro = (filtroAgendaActual === 'TODOS') || (diaAsignado === filtroAgendaActual);
-    const cumpleBusqueda = !buscador || 
-                     (p.nombre && p.nombre.toLowerCase().includes(buscador)) ||
-                     (p.telefono && p.telefono.includes(buscador)) ||
-                     (p.vacanteInteres && p.vacanteInteres.toLowerCase().includes(buscador)) ||
-                     (p.empresa && p.empresa.toLowerCase().includes(buscador));
-    return cumpleFiltro && cumpleBusqueda;
-  }).forEach(p => {
-    const tr = document.createElement('tr');
-    let badgeEstatus = `<span class="badge-estatus" style="background: #fed7aa; color: #ea580c; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${p.estatus || 'Pendiente'}</span>`;
-    
-    let botonWhatsapp = '—';
-    if (p.telefono) {
-      const numLimpio = p.telefono.replace(/\D/g, "");
-      const mensajePredefinido = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, nos comunicamos de Bolsa de Trabajo...`);
-      botonWhatsapp = `
-        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-premium">
-          <i class="fab fa-whatsapp"></i> WhatsApp
-        </a>
-      `;
-    }
-
-    tr.innerHTML = `
-      <td style="font-weight:bold; color: #f5f5f7;">${p.nombre || '—'}</td>
-      <td><div>${botonWhatsapp}</div></td>
-      <td><span style="color: var(--primary-orange); font-weight: 500;">${p.empresa || p.empresaId || '—'}</span> / ${p.vacanteInteres || '—'}</td>
-      <td style="color: #d6d3d1;">${p.edad || '—'} años (${p.sexo || '—'})</td>
-      <td>
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          ${badgeEstatus}
-          <span style="font-size: 0.75rem; color: #a8a29e;"><i class="far fa-calendar-alt"></i> ${p.diaEntrevista || 'Sin agendar'} ${p.horaCita ? `a las ${p.horaCita}` : ''}</span>
-        </div>
-      </td>
-      <td>
-        <div class="actions-layout" style="margin-top:0;">
-          <button class="btn-edit-mode" style="padding:6px 10px;" onclick="window.abrirEditorPostulante('${p.idFirebase}')"><i class="fas fa-user-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:6px 10px;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-};
-
-window.abrirEditorPostulante = function(id) {
-  const p = listaPostulantesGlobal.find(cand => cand.idFirebase === id);
-  if(!p) return;
-  document.getElementById('editPostulanteId').value = id;
-  document.getElementById('editPostulanteEstatus').value = p.estatus || "Pendiente";
-  document.getElementById('editPostulanteDia').value = p.diaEntrevista || "";
-  document.getElementById('editPostulanteHora').value = p.horaCita || "";
-  document.getElementById('editPostulanteReclutador').value = p.reclutadorAsignado || "";
-  document.getElementById('editPostulanteNotas').value = p.notasInternas || p.notesInternas || "";
-  document.getElementById('panelEdicionPostulante').classList.add('open');
-};
-
-window.eliminarPostulanteSistema = function(id) {
-  if(!confirm("¿Eliminar postulación?")) return;
-  if(db && id) {
-    remove(ref(db, `postulantes/${id}`)).then(() => {
-      registrarLogSistema("Postulantes", `Expediente eliminado: ${id}`);
-    });
-  }
-};
-
-window.actualizarSelectoresEmpresa = function() {
-  const selectVacantesTab = document.getElementById('secEmpresaSelect');
-  if (!selectVacantesTab) return;
-  const valorGuardado = selectVacantesTab.value;
-  selectVacantesTab.innerHTML = '<option value="">-- Elige una Empresa --</option>';
-  listaEmpresasGlobal.forEach(emp => {
-    const opt = document.createElement('option');
-    opt.value = emp.idFirebase;
-    opt.textContent = emp.nombre || emp.idFirebase;
-    selectVacantesTab.appendChild(opt);
-  });
-  selectVacantesTab.value = valorGuardado;
-};
-
-window.actualizarSelectoresVacantes = function() {
-  const selectEmpresa = document.getElementById('secEmpresaSelect');
-  const boxGestion = document.getElementById('boxGestionVacantes');
-  const selectorVacantesFB = document.getElementById('selectorVacantesEnFirebase');
-  if (!selectEmpresa || !boxGestion || !selectorVacantesFB) return;
-
-  const empresaSeleccionada = selectEmpresa.value;
-  if (!empresaSeleccionada) {
-    boxGestion.style.display = "none";
-    return;
-  }
-  const vacantesFiltradas = listaVacantesGlobal.filter(v => v.empresaMatriz === empresaSeleccionada);
-  if (vacantesFiltradas.length === 0) {
-    boxGestion.style.display = "none";
-    return;
-  }
-  boxGestion.style.display = "block";
-  selectorVacantesFB.innerHTML = '<option value="">-- Selecciona Vacante --</option>';
-  vacantesFiltradas.forEach(vac => {
-    const opt = document.createElement('option');
-    opt.value = vac.idFirebase;
-    opt.textContent = `[${vac.idClave}] ${vac.nombreVacante || 'Sin Nombre'}`;
-    selectorVacantesFB.appendChild(opt);
-  });
-};
-
-window.renderizarTablaEmpresas = function() {
-  const tbody = document.getElementById('tbodyEmpresas');
-  const filtro = document.getElementById('buscarEmpresaInput').value.toLowerCase().trim();
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  listaEmpresasGlobal.filter(emp => 
-    emp.idFirebase.toLowerCase().includes(filtro) || (emp.nombre && emp.nombre.toLowerCase().includes(filtro))
-  ).forEach(emp => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><img src="${emp.logoUrl}" alt="Logo" style="width:40px; height:40px; object-fit:contain;"></td>
-      <td style="font-weight:bold; color:var(--primary-orange);">${emp.idFirebase}</td>
-      <td>${emp.nombre || '—'}</td>
-      <td style="color:#a8a29e;">"${emp.textoBienvenida || '¡Te esperamos!'}"</td>
-      <td>
-        <div class="actions-layout" style="margin-top:0;">
-          <button class="btn-edit-mode" style="padding:5px 10px;" onclick="window.cargarEmpresaEnEdicion('${emp.idFirebase}')"><i class="fas fa-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:5px 10px;" onclick="window.eliminarEmpresaSistema('${emp.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-};
-
-window.cargarEmpresaEnEdicion = function(idEmpresa) {
-  const empresa = listaEmpresasGlobal.find(e => e.idFirebase === idEmpresa);
-  if (!empresa) return;
-  idEmpresaEdicionActiva = idEmpresa;
-
-  document.getElementById('empIdInput').value = empresa.idFirebase;
-  document.getElementById('empIdInput').disabled = true;
-  document.getElementById('empNombreInput').value = empresa.nombre || "";
-  document.getElementById('empLogoInput').value = empresa.logoUrl || "";
-  document.getElementById('empColorInput').value = empresa.colorTema || "#ff6600";
-  document.getElementById('empBannerInput').value = empresa.bannerUrl || "";
-  document.getElementById('empWaContactoInput').value = empresa.waContacto || "";
-  document.getElementById('empMsgPredefinidoInput').value = empresa.msgPredefinido || "";
-  document.getElementById('empTextoBienvenidaInput').value = empresa.textoBienvenida || "";
-  document.getElementById('empRequisitosInput').value = empresa.requisitos || "";
-  document.getElementById('empBeneficiosInput').value = empresa.beneficios || "";
-  document.getElementById('empDocumentacionInput').value = empresa.documentacion || "";
-
-  document.getElementById('btnGuardarEmpresa').style.display = "none";
-  document.getElementById('btnActualizarEmpresa').style.display = "block";
-  document.getElementById('btnCancelarEdicionEmpresa').style.display = "block";
-};
-
-window.eliminarEmpresaSistema = function(idEmpresa) {
-  if (!confirm(`¿Borrar empresa "${idEmpresa}"?`)) return;
-  if (db) {
-    remove(ref(db, `empresas/${idEmpresa}`)).then(() => {
-      registrarLogSistema("Empresas", `Empresa eliminada: ${idEmpresa}`);
-    });
-  }
-};
-
-window.actualizarSelectoresReclutadores = function() {
-  const selectEdit = document.getElementById('editPostulanteReclutador');
-  if(!selectEdit) return;
-  selectEdit.innerHTML = '<option value="">-- Sin Reclutador --</option>';
-  listaReclutadoresGlobal.forEach(rec => {
-    const opt = document.createElement('option');
-    opt.value = rec.idFirebase;
-    opt.textContent = rec.nombre || rec.idFirebase;
-    selectEdit.appendChild(opt);
-  });
-};
-
-window.renderizarTablaReclutadores = function() {
-  const tbody = document.getElementById('tbodyReclutadores');
-  const buscador = document.getElementById('buscarReclutadorInput').value.toLowerCase().trim();
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  listaReclutadoresGlobal.filter(rec => 
-    rec.idFirebase.toLowerCase().includes(buscador) || (rec.nombre && rec.nombre.toLowerCase().includes(buscador))
-  ).forEach(rec => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${rec.idFirebase}</td>
-      <td>${rec.nombre || '—'}</td>
-      <td>${rec.telefono || '—'}</td>
-      <td>${rec.estatus || 'activo'}</td>
-      <td>
-        <div class="actions-layout" style="margin-top:0;">
-          <button class="btn-edit-mode" style="padding:4px 8px;" onclick="window.cargarReclutadorEnEdicion('${rec.idFirebase}')"><i class="fas fa-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:4px 8px;" onclick="window.eliminarReclutadorSistema('${rec.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-};
-
-window.cargarReclutadorEnEdicion = function(id) {
-  const rec = listaReclutadoresGlobal.find(r => r.idFirebase === id);
-  if(!rec) return;
-  idReclutadorEdicionActiva = id;
-  document.getElementById('recIdInput').value = rec.idFirebase;
-  document.getElementById('recIdInput').disabled = true;
-  document.getElementById('recNombreInput').value = rec.nombre || "";
-  document.getElementById('recTelefonoInput').value = rec.telefono || "";
-  document.getElementById('recEstatusSelect').value = rec.estatus || "activo";
-
-  document.getElementById('btnGuardarReclutador').style.display = "none";
-  document.getElementById('btnActualizarReclutador').style.display = "block";
-  document.getElementById('btnCancelarEdicionReclutador').style.display = "block";
-};
-
-window.eliminarReclutadorSistema = function(id) {
-  if(!confirm(`¿Eliminar al reclutador ${id}?`)) return;
-  if(db) {
-    remove(ref(db, `reclutadores/${id}`)).then(() => {
-      registrarLogSistema("Reclutadores", `Reclutador eliminado: ${id}`);
-    });
-  }
-};
-
-function obtenerDatosFormularioEmpresa() {
-  return {
-    nombre: document.getElementById('empNombreInput').value.trim(),
-    logoUrl: document.getElementById('empLogoInput').value.trim(),
-    colorTema: document.getElementById('empColorInput').value,
-    bannerUrl: document.getElementById('empBannerInput').value.trim(),
-    waContacto: document.getElementById('empWaContactoInput').value.trim(),
-    msgPredefinido: document.getElementById('empMsgPredefinidoInput').value.trim(),
-    textoBienvenida: document.getElementById('empTextoBienvenidaInput').value.trim(),
-    requisitos: document.getElementById('empRequisitosInput').value.trim(),
-    beneficios: document.getElementById('empBeneficiosInput').value.trim(),
-    documentacion: document.getElementById('empDocumentacionInput').value.trim()
-  };
-}
-
-window.limpiarFormularioEmpresa = function() {
-  document.getElementById('empIdInput').value = "";
-  document.getElementById('empIdInput').disabled = false;
-  document.getElementById('empNombreInput').value = "";
-  document.getElementById('empLogoInput').value = "";
-  document.getElementById('empColorInput').value = "#ff6600";
-  document.getElementById('empBannerInput').value = "";
-  document.getElementById('empWaContactoInput').value = "";
-  document.getElementById('empMsgPredefinidoInput').value = "";
-  document.getElementById('empTextoBienvenidaInput').value = "";
-  document.getElementById('empRequisitosInput').value = "";
-  document.getElementById('empBeneficiosInput').value = "";
-  document.getElementById('empDocumentacionInput').value = "";
-};
-
-window.cancelarEdicionEmpresa = function() {
-  idEmpresaEdicionActiva = null;
-  window.limpiarFormularioEmpresa();
-  document.getElementById('btnGuardarEmpresa').style.display = "block";
-  document.getElementById('btnActualizarEmpresa').style.display = "none";
-  document.getElementById('btnCancelarEdicionEmpresa').style.display = "none";
-};
-
-// EVENTOS DOM
-document.addEventListener("DOMContentLoaded", () => {
-  inicializarNavegacionTabs();
-
-  const apiKeyInput = document.getElementById('geminiApiKeyInput');
-  apiKeyInput.addEventListener('change', () => {
-    conectarFirebaseConApiKey(apiKeyInput.value);
-  });
-
-  // Guardar/Actualizar Empresa
-  document.getElementById('btnGuardarEmpresa').addEventListener('click', () => {
-    const id = document.getElementById('empIdInput').value.trim();
-    if(!id) return alert("ID Obligatorio");
-    if(db) set(ref(db, `empresas/${id}`), obtenerDatosFormularioEmpresa()).then(() => window.limpiarFormularioEmpresa());
-  });
-
-  document.getElementById('btnActualizarEmpresa').addEventListener('click', () => {
-    if(db && idEmpresaEdicionActiva) {
-      update(ref(db, `empresas/${idEmpresaEdicionActiva}`), obtenerDatosFormularioEmpresa()).then(() => {
-        window.cancelarEdicionEmpresa();
-      });
-    }
-  });
-
-  document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', window.cancelarEdicionEmpresa);
-  document.getElementById('secEmpresaSelect').addEventListener('change', window.actualizarSelectoresVacantes);
-  document.getElementById('buscarEmpresaInput').addEventListener('input', window.renderizarTablaEmpresas);
-
-  // Reclutadores
-  document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
-    const id = document.getElementById('recIdInput').value.trim();
-    if(!id) return;
-    const datos = {
-      nombre: document.getElementById('recNombreInput').value.trim(),
-      telefono: document.getElementById('recTelefonoInput').value.trim(),
-      estatus: document.getElementById('recEstatusSelect').value
-    };
-    if(db) set(ref(db, `reclutadores/${id}`), datos).then(() => {
-      document.getElementById('recIdInput').value = "";
-      document.getElementById('recNombreInput').value = "";
-      document.getElementById('recTelefonoInput').value = "";
-    });
-  });
-
-  document.getElementById('btnActualizarReclutador').addEventListener('click', () => {
-    if(db && idReclutadorEdicionActiva) {
-      const datos = {
-        nombre: document.getElementById('recNombreInput').value.trim(),
-        telefono: document.getElementById('recTelefonoInput').value.trim(),
-        estatus: document.getElementById('recEstatusSelect').value
-      };
-      update(ref(db, `reclutadores/${idReclutadorEdicionActiva}`), datos).then(() => {
-        idReclutadorEdicionActiva = null;
-        document.getElementById('recIdInput').disabled = false;
-        document.getElementById('recIdInput').value = "";
-        document.getElementById('recNombreInput').value = "";
-        document.getElementById('recTelefonoInput').value = "";
-        document.getElementById('btnGuardarReclutador').style.display = "block";
-        document.getElementById('btnActualizarReclutador').style.display = "none";
-        document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
-      });
-    }
-  });
-
-  document.getElementById('buscarReclutadorInput').addEventListener('input', window.renderizarTablaReclutadores);
-  document.getElementById('buscarPostulanteInput').addEventListener('input', window.renderizarTablaPostulantes);
-
-  document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
-    document.getElementById('panelEdicionPostulante').classList.remove('open');
-  });
-
-  document.getElementById('btnGuardarCambiosPostulante').addEventListener('click', () => {
-    const id = document.getElementById('editPostulanteId').value;
-    if(!id || !db) return;
-    const data = {
-      estatus: document.getElementById('editPostulanteEstatus').value,
-      diaEntrevista: document.getElementById('editPostulanteDia').value,
-      horaCita: document.getElementById('editPostulanteHora').value,
-      reclutadorAsignado: document.getElementById('editPostulanteReclutador').value,
-      notasInternas: document.getElementById('editPostulanteNotas').value
-    };
-    update(ref(db, `postulantes/${id}`), data).then(() => {
-      document.getElementById('panelEdicionPostulante').classList.remove('open');
-      registrarLogSistema("Postulantes", `Expediente actualizado: ${id}`);
-    });
-  });
-});
-/* ============================================================
-   FUNCIONES PESTAÑA 1 · VERSIÓN CORREGIDA 1.1
-   100% compatibles con datos antiguos y nuevos
-   ============================================================ */
-const BASE_URL_GITHUB = 'https://valdomtec-arch.github.io/bolsa-trabajo-principal/vacante.html?empresa=';
-
-// --- AUTO-GENERAR ENLACE GITHUB MIENTRAS ESCRIBES EL ID ---
+// ==============================================
+// 4. FUNCIONES DE EMPRESAS (VERSIÓN ÚNICA - SIN DUPLICADOS)
+// ==============================================
 function actualizarEnlaceGithub() {
   const inputId = document.getElementById('empIdInput');
   const spanId = document.getElementById('idEmpresaSpan');
   const btnAbrir = document.getElementById('btnAbrirLink');
   const id = inputId.value.trim().toUpperCase();
-  
-  if (id) {
-    spanId.textContent = id;
-    btnAbrir.href = BASE_URL_GITHUB + id;
-  } else {
-    spanId.textContent = '{ID_EMPRESA}';
-    btnAbrir.href = '#';
-  }
+  spanId.textContent = id || '{ID_EMPRESA}';
+  btnAbrir.href = id ? BASE_URL_GITHUB + id : '#';
 }
 
-// --- OBTENER DATOS DEL FORMULARIO (NUEVA ESTRUCTURA) ---
 function obtenerDatosFormularioEmpresa() {
-  const id = document.getElementById('empIdInput').value.trim().toUpperCase();
   return {
-    id: id,
     nombre: document.getElementById('empNombreInput').value.trim(),
     tags: document.getElementById('empTagsInput').value.trim(),
     ubicacion: document.getElementById('empUbicacionInput').value.trim(),
     imagen: document.getElementById('empLogoInput').value.trim(),
-    link: BASE_URL_GITHUB + id
+    link: BASE_URL_GITHUB + document.getElementById('empIdInput').value.trim().toUpperCase()
   };
 }
 
-// --- VALIDAR CAMPOS OBLIGATORIOS ---
 function validarFormEmpresa() {
   const id = document.getElementById('empIdInput').value.trim();
   const nombre = document.getElementById('empNombreInput').value.trim();
   const ubicacion = document.getElementById('empUbicacionInput').value.trim();
-  
   if (!id) { alert('❌ El ID de empresa es OBLIGATORIO'); return false; }
   if (!nombre) { alert('❌ El Nombre Comercial es OBLIGATORIO'); return false; }
   if (!ubicacion) { alert('❌ La Ubicación Base es OBLIGATORIA'); return false; }
   return true;
 }
 
-// --- CAMBIAR A MODO EDICIÓN / MODO NUEVO ---
 function cambiarModoBotones(modo) {
   const btnGuardar = document.getElementById('btnGuardarEmpresa');
   const btnLimpiar = document.getElementById('btnLimpiarFormEmpresa');
@@ -1956,7 +1260,7 @@ function cambiarModoBotones(modo) {
   const btnActualizar = document.getElementById('btnActualizarEmpresa');
   const btnCancelar = document.getElementById('btnCancelarEdicionEmpresa');
   const layout = document.getElementById('layoutBotonesEmpresa');
-
+  
   if (modo === 'edicion') {
     btnGuardar.style.display = 'none';
     btnLimpiar.style.display = 'none';
@@ -1974,70 +1278,59 @@ function cambiarModoBotones(modo) {
   }
 }
 
-// --- RENDERIZAR TABLA EMPRESAS (COMPATIBLE DATOS NUEVOS + ANTIGUOS) ---
-window.renderizarTablaEmpresas = function() {
+function renderizarTablaEmpresas() {
   const tbody = document.getElementById('tbodyEmpresas');
   const filtro = document.getElementById('buscarEmpresaInput').value.toLowerCase().trim();
   const contador = document.getElementById('contadorEmpresas');
-  
   if (!tbody) return;
+  
   tbody.innerHTML = "";
   contador.textContent = listaEmpresasGlobal.length;
-
+  
   const empresasFiltradas = listaEmpresasGlobal.filter(emp => {
-    // COMPATIBILIDAD: acepta campos nuevos y antiguos
     const nombre = emp.nombre || '-';
-    const tags = emp.tags || '';
+    const tags = emp.tags || emp.imagen || '';
     const ubicacion = emp.ubicacion || emp.tags || '';
-    const textoBusqueda = `${emp.idFirebase} ${nombre} ${tags} ${ubicacion}`.toLowerCase();
-    return textoBusqueda.includes(filtro);
+    const texto = `${emp.idFirebase} ${nombre} ${tags} ${ubicacion}`.toLowerCase();
+    return texto.includes(filtro);
   });
-
+  
   empresasFiltradas.forEach(emp => {
     const tr = document.createElement('tr');
-    // COMPATIBILIDAD: usa imagen si existe, si no usa logoUrl antiguo
-    const urlLogo = emp.imagen || emp.logoUrl || 'https://cdn-icons-png.flaticon.com/64/5339/5339155.png';
+    const urlLogo = emp.imagen || emp.logoUrl || LOGO_POR_DEFECTO;
     const linkVacante = emp.link || BASE_URL_GITHUB + emp.idFirebase;
     const tagsArray = (emp.tags || '').split(',').filter(t => t.trim());
     
     tr.innerHTML = `
-      <td><img src="${urlLogo}" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/64/5339/5339155.png'"></td>
+      <td><img src="${urlLogo}" alt="Logo" onerror="this.src='${LOGO_POR_DEFECTO}'" style="width:42px;height:42px;object-fit:contain;border-radius:6px;background:white;padding:2px;"></td>
       <td style="font-weight:bold; color:var(--primary-orange); font-family:'Courier New',monospace;">${emp.idFirebase}</td>
       <td style="font-weight:600;">${emp.nombre || '-'}</td>
       <td><i class="fas fa-map-marker-alt" style="color:#f59e0b; font-size:0.75rem;"></i> ${emp.ubicacion || '-'}</td>
       <td style="font-size:0.78rem;">
         ${tagsArray.length ? tagsArray.map(tag => 
-          `<span style="display:inline-block; background:#1e293b; color:#cbd5e1; 
-                       padding:2px 8px; border-radius:10px; margin:2px; border:1px solid var(--border-color);">
-             ${tag.trim()}
-           </span>`
+          `<span style="display:inline-block; background:#1e293b; color:#cbd5e1; padding:2px 8px; border-radius:10px; margin:2px; border:1px solid var(--border-color);">${tag.trim()}</span>`
         ).join('') : '<span style="color:var(--text-muted);">Sin tags</span>'}
       </td>
       <td>
-        <a href="${linkVacante}" target="_blank" class="btn-wa-premium" 
-           style="background:#0ea5e9; box-shadow:0 0 8px rgba(14,165,233,0.3); padding:4px 10px; font-size:0.75rem;">
+        <a href="${linkVacante}" target="_blank" class="btn-wa-premium" style="background:#0ea5e9; box-shadow:0 0 8px rgba(14,165,233,0.3); padding:4px 10px; font-size:0.75rem;">
           <i class="fas fa-link"></i>
         </a>
       </td>
       <td>
         <div class="actions-layout" style="margin-top:0; justify-content:flex-end;">
-          <button class="btn-edit-mode" style="padding:5px 9px; font-size:0.8rem;"
-                  onclick="window.cargarEmpresaEnEdicion('${emp.idFirebase}')">
+          <button class="btn-edit-mode" style="padding:5px 9px; font-size:0.8rem;" onclick="cargarEmpresaEnEdicion('${emp.idFirebase}')">
             <i class="fas fa-edit"></i> Editar
           </button>
-          <button class="btn-delete-mode" style="padding:5px 9px; font-size:0.8rem;"
-                  onclick="window.eliminarEmpresaSistema('${emp.idFirebase}')">
+          <button class="btn-delete-mode" style="padding:5px 9px; font-size:0.8rem;" onclick="eliminarEmpresaSistema('${emp.idFirebase}')">
             <i class="fas fa-trash-alt"></i>
           </button>
         </div>
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
-};
+}
 
-// --- CARGAR EMPRESA EN EDICIÓN ---
-window.cargarEmpresaEnEdicion = function(idEmpresa) {
+function cargarEmpresaEnEdicion(idEmpresa) {
   const empresa = listaEmpresasGlobal.find(e => e.idFirebase === idEmpresa);
   if (!empresa) return;
   
@@ -2047,19 +1340,16 @@ window.cargarEmpresaEnEdicion = function(idEmpresa) {
   document.getElementById('empNombreInput').value = empresa.nombre || "";
   document.getElementById('empTagsInput').value = empresa.tags || "";
   document.getElementById('empUbicacionInput').value = empresa.ubicacion || "";
-  // COMPATIBILIDAD: carga logo nuevo o antiguo
   document.getElementById('empLogoInput').value = empresa.imagen || empresa.logoUrl || "";
   
   actualizarEnlaceGithub();
   cambiarModoBotones('edicion');
-  // Subir automáticamente al formulario
-  document.getElementById('tabPrincipal').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  registrarLogSistema("Empresas", `Modo edición activado: ${idEmpresa}`);
-};
+  document.getElementById('tabPrincipal').scrollIntoView({ behavior: 'smooth' });
+  registrarLogSistema("Empresas", `Edición: ${idEmpresa}`);
+}
 
-// --- CANCELAR EDICIÓN ---
-window.cancelarEdicionEmpresa = function() { 
-  idEmpresaEdicionActiva = null; 
+function cancelarEdicionEmpresa() {
+  idEmpresaEdicionActiva = null;
   const inputId = document.getElementById('empIdInput');
   inputId.value = '';
   inputId.disabled = false;
@@ -2069,135 +1359,387 @@ window.cancelarEdicionEmpresa = function() {
   document.getElementById('empLogoInput').value = '';
   actualizarEnlaceGithub();
   cambiarModoBotones('nuevo');
-  registrarLogSistema("Empresas", "Edición cancelada");
-};
+}
 
-// --- EVENTOS GLOBALES DE LA PESTAÑA 1 ---
+function eliminarEmpresaSistema(idEmpresa) {
+  if (!confirm(`¿Borrar empresa "${idEmpresa}" PERMANENTEMENTE?`)) return;
+  if (db) db.ref(`empresas/${idEmpresa}`).remove()
+    .then(() => registrarLogSistema("BAJA EMPRESA", idEmpresa));
+}
+
+// ==============================================
+// 5. FUNCIONES DE VACANTES, RECLUTADORES, POSTULANTES, ESTADÍSTICAS
+// ==============================================
+function registrarLogSistema(modulo, accion) {
+  const consola = document.getElementById('consolaSistemaLogs');
+  if (!consola) return;
+  const ahora = new Date();
+  const timestamp = `[${ahora.toLocaleDateString('es-MX')} ${ahora.toLocaleTimeString('es-MX')}]`;
+  const logItem = document.createElement('div');
+  logItem.className = 'log-item';
+  logItem.innerHTML = `<span class="log-time">${timestamp} [${modulo}]</span> <span class="log-action">${accion}</span>`;
+  consola.appendChild(logItem);
+  consola.scrollTop = consola.scrollHeight;
+}
+
+function actualizarSelectoresEmpresa() {
+  const select = document.getElementById('secEmpresaSelect');
+  if (!select) return;
+  const valorGuardado = select.value;
+  select.innerHTML = '<option value="">-- Elige una Empresa --</option>';
+  listaEmpresasGlobal.forEach(emp => {
+    const opt = document.createElement('option');
+    opt.value = emp.idFirebase;
+    opt.textContent = emp.nombre || emp.idFirebase;
+    select.appendChild(opt);
+  });
+  select.value = valorGuardado;
+}
+
+function actualizarSelectoresVacantes() {
+  const selectEmpresa = document.getElementById('secEmpresaSelect');
+  const boxGestion = document.getElementById('boxGestionVacantes');
+  const selectorFB = document.getElementById('selectorVacantesEnFirebase');
+  if (!selectEmpresa || !boxGestion || !selectorFB) return;
+  
+  const empSel = selectEmpresa.value;
+  if (!empSel) { boxGestion.style.display = "none"; return; }
+  
+  const vacantes = listaVacantesGlobal.filter(v => v.empresaMatriz === empSel);
+  if (vacantes.length === 0) { boxGestion.style.display = "none"; return; }
+  
+  boxGestion.style.display = "block";
+  selectorFB.innerHTML = '<option value="">-- Selecciona Vacante --</option>';
+  vacantes.forEach(vac => {
+    const opt = document.createElement('option');
+    opt.value = vac.idFirebase;
+    opt.textContent = `[${vac.idClave}] ${vac.nombreVacante || 'Sin Nombre'}`;
+    selectorFB.appendChild(opt);
+  });
+}
+
+function actualizarSelectoresReclutadores() {
+  const select = document.getElementById('editPostulanteReclutador');
+  if (!select) return;
+  select.innerHTML = '<option value="">-- Sin Reclutador --</option>';
+  listaReclutadoresGlobal.forEach(rec => {
+    const opt = document.createElement('option');
+    opt.value = rec.idFirebase;
+    opt.textContent = rec.nombre || rec.idFirebase;
+    select.appendChild(opt);
+  });
+}
+
+function renderizarTablaReclutadores() {
+  const tbody = document.getElementById('tbodyReclutadores');
+  const buscador = document.getElementById('buscarReclutadorInput')?.value.toLowerCase().trim() || '';
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  
+  listaReclutadoresGlobal.filter(rec => 
+    rec.idFirebase.toLowerCase().includes(buscador) || 
+    (rec.nombre && rec.nombre.toLowerCase().includes(buscador))
+  ).forEach(rec => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${rec.idFirebase}</td>
+      <td>${rec.nombre || '-'}</td>
+      <td>${rec.telefono || '-'}</td>
+      <td>${rec.estatus || 'activo'}</td>
+      <td>
+        <div class="actions-layout" style="margin-top:0;">
+          <button class="btn-edit-mode" style="padding:4px 8px;" onclick="cargarReclutadorEnEdicion('${rec.idFirebase}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-delete-mode" style="padding:4px 8px;" onclick="eliminarReclutadorSistema('${rec.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function cargarReclutadorEnEdicion(id) {
+  const rec = listaReclutadoresGlobal.find(r => r.idFirebase === id);
+  if (!rec) return;
+  idReclutadorEdicionActiva = id;
+  document.getElementById('recIdInput').value = rec.idFirebase;
+  document.getElementById('recIdInput').disabled = true;
+  document.getElementById('recNombreInput').value = rec.nombre || "";
+  document.getElementById('recTelefonoInput').value = rec.telefono || "";
+  document.getElementById('recEstatusSelect').value = rec.estatus || "activo";
+  document.getElementById('btnGuardarReclutador').style.display = "none";
+  document.getElementById('btnActualizarReclutador').style.display = "block";
+  document.getElementById('btnCancelarEdicionReclutador').style.display = "block";
+}
+
+function eliminarReclutadorSistema(id) {
+  if (!confirm(`¿Eliminar reclutador ${id}?`)) return;
+  if (db) db.ref(`reclutadores/${id}`).remove()
+    .then(() => registrarLogSistema("Reclutadores", `Eliminado: ${id}`));
+}
+
+function calcularMetricasDemograficas() {
+  const total = listaPostulantesGlobal.length;
+  let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
+  
+  listaPostulantesGlobal.forEach(p => {
+    const gen = (p.sexo || '').toLowerCase().trim();
+    if (gen.includes('masc') || gen === 'm' || gen === 'hombre') hombres++;
+    else if (gen.includes('fem') || gen === 'f' || gen === 'mujer') mujeres++;
+    const edad = parseInt(p.edad, 10);
+    if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
+  });
+  
+  document.getElementById('totalPostulantesMetrica').textContent = total;
+  document.getElementById('metHombres').textContent = total ? `${Math.round((hombres/total)*100)}%` : '0%';
+  document.getElementById('metMujeres').textContent = total ? `${Math.round((mujeres/total)*100)}%` : '0%';
+  document.getElementById('metPromedioEdad').textContent = conteoEdades ? `${Math.round(sumaEdades/conteoEdades)} años` : '0';
+}
+
+function filtrarAgendaPorEstatus(dia) {
+  filtroAgendaActual = dia.toUpperCase();
+  document.getElementById('lblFiltroAgendaActivo').textContent = 
+    dia === 'TODOS' ? 'Todos los postulantes' : `Citados el día ${dia}`;
+  renderizarTablaPostulantes();
+}
+
+function renderizarTablaPostulantes() {
+  const tbody = document.getElementById('tbodyPostulantes');
+  const buscador = document.getElementById('buscarPostulanteInput')?.value.toLowerCase().trim() || '';
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  
+  listaPostulantesGlobal.filter(p => {
+    const dia = (p.diaEntrevista || '').toUpperCase();
+    const cumpleFiltro = filtroAgendaActual === 'TODOS' || dia === filtroAgendaActual;
+    const cumpleBusqueda = !buscador || 
+      (p.nombre && p.nombre.toLowerCase().includes(buscador)) ||
+      (p.telefono && p.telefono.includes(buscador)) ||
+      (p.vacanteInteres && p.vacanteInteres.toLowerCase().includes(buscador)) ||
+      (p.empresa && p.empresa.toLowerCase().includes(buscador));
+    return cumpleFiltro && cumpleBusqueda;
+  }).forEach(p => {
+    const tr = document.createElement('tr');
+    const estatus = p.estatus || 'Pendiente';
+    let badge = `<span style="background:#fed7aa;color:#ea580c;padding:3px 8px;border-radius:12px;font-size:0.75rem;font-weight:bold;">${estatus}</span>`;
+    let waBtn = '-';
+    if (p.telefono) {
+      const num = p.telefono.replace(/\D/g, "");
+      const msg = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, de Bolsa de Trabajo`);
+      waBtn = `<a href="https://wa.me/${num}?text=${msg}" target="_blank" class="btn-wa-premium" style="font-size:0.75rem;padding:4px 10px;"><i class="fab fa-whatsapp"></i></a>`;
+    }
+    
+    tr.innerHTML = `
+      <td style="font-weight:bold;">${p.nombre || '-'}</td>
+      <td>${waBtn}</td>
+      <td><span style="color:var(--primary-orange);font-weight:500;">${p.empresa || '-'}</span> / ${p.vacanteInteres || '-'}</td>
+      <td style="color:#d6d3d1;">${p.edad || '-'} años (${p.sexo || '-'})</td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          ${badge}
+          <span style="font-size:0.75rem;color:#a8a29e;"><i class="far fa-calendar-alt"></i> ${p.diaEntrevista || 'Sin agendar'} ${p.horaCita ? `a las ${p.horaCita}` : ''}</span>
+        </div>
+      </td>
+      <td>
+        <div class="actions-layout" style="margin-top:0;">
+          <button class="btn-edit-mode" style="padding:6px 10px;" onclick="abrirEditorPostulante('${p.idFirebase}')"><i class="fas fa-user-edit"></i></button>
+          <button class="btn-delete-mode" style="padding:6px 10px;" onclick="eliminarPostulanteSistema('${p.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function abrirEditorPostulante(id) {
+  const p = listaPostulantesGlobal.find(c => c.idFirebase === id);
+  if (!p) return;
+  document.getElementById('editPostulanteId').value = id;
+  document.getElementById('editPostulanteEstatus').value = p.estatus || "Pendiente";
+  document.getElementById('editPostulanteDia').value = p.diaEntrevista || "";
+  document.getElementById('editPostulanteHora').value = p.horaCita || "";
+  document.getElementById('editPostulanteReclutador').value = p.reclutadorAsignado || "";
+  document.getElementById('editPostulanteNotas').value = p.notasInternas || "";
+  document.getElementById('panelEdicionPostulante').classList.add('open');
+}
+
+function eliminarPostulanteSistema(id) {
+  if (!confirm("¿Eliminar postulación?")) return;
+  if (db) db.ref(`postulantes/${id}`).remove()
+    .then(() => registrarLogSistema("Postulantes", `Eliminado: ${id}`));
+}
+
+// ==============================================
+// 6. EVENTOS GLOBALES (UN SOLO DOMContentLoaded)
+// ==============================================
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ 1. Inicializa pestañas (AHORA SÍ FUNCIONA)
+  inicializarNavegacionTabs();
+  
+  // ✅ 2. Enlace GitHub en tiempo real
   const inputId = document.getElementById('empIdInput');
   inputId.addEventListener('input', actualizarEnlaceGithub);
   actualizarEnlaceGithub();
-
-  // MOSTRAR / OCULTAR API KEY
+  
+  // ✅ 3. Mostrar/ocultar API Key
   document.getElementById('toggleApiKey').addEventListener('click', (e) => {
     const input = document.getElementById('geminiApiKeyInput');
     const icon = e.currentTarget.querySelector('i');
     input.type = input.type === 'password' ? 'text' : 'password';
     icon.className = input.type === 'text' ? 'fas fa-eye-slash' : 'fas fa-eye';
   });
-
-  // CONECTAR API KEY (mantiene lógica original + nueva)
+  
+  // ✅ 4. Conectar API Key al hacer clic
   const apiKeyInput = document.getElementById('geminiApiKeyInput');
   document.getElementById('btnConectarApiKey').addEventListener('click', () => {
     const clave = apiKeyInput.value.trim();
     if (!clave) return alert('❌ Pega tu API Key primero');
     localStorage.setItem('apiKeyGemini', clave);
     conectarFirebaseConApiKey(clave);
-    document.getElementById('estadoConexionApi').innerHTML = 
-      '<i class="fas fa-circle-notch fa-spin" style="color:#f59e0b;"></i> Conectando...';
   });
-  // Evento original de cambio automático
-  apiKeyInput.addEventListener('change', () => {
-    if (apiKeyInput.value.trim()) conectarFirebaseConApiKey(apiKeyInput.value.trim());
-  });
-  // Cargar clave guardada al iniciar
+  
+  // ✅ 5. CONEXIÓN AUTOMÁTICA AL CARGAR LA PÁGINA (CLAVE GUARDADA)
   const claveGuardada = localStorage.getItem('apiKeyGemini');
   if (claveGuardada) {
     apiKeyInput.value = claveGuardada;
     conectarFirebaseConApiKey(claveGuardada);
   }
-
-  // COPIAR ENLACE GITHUB
-  document.getElementById('btnCopiarLink').addEventListener('click', async () => {
-    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
-    if (!id) return alert('❌ Primero escribe un ID de empresa');
-    const url = BASE_URL_GITHUB + id;
-    try {
-      await navigator.clipboard.writeText(url);
-      const btn = document.getElementById('btnCopiarLink');
-      const txtOriginal = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
-      setTimeout(() => btn.innerHTML = txtOriginal, 1800);
-    } catch (err) { alert('Error al copiar: ' + err.message); }
-  });
-
-  // BOTÓN LIMPIAR
-  document.getElementById('btnLimpiarFormEmpresa').addEventListener('click', () => {
-    if (!confirm('¿Limpiar todo el formulario?')) return;
-    window.cancelarEdicionEmpresa();
-  });
-
-  // BOTÓN BORRAR ID (acción rápida)
-  document.getElementById('btnBorrarIdEmpresa').addEventListener('click', () => {
-    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
-    if (!id) return alert('❌ Escribe o carga un ID primero');
-    if (!confirm(`⚠️ ¿ELIMINAR "${id}" PERMANENTEMENTE?\n\nEsto NO borra vacantes ni postulantes.`)) return;
-    
-    if (db) {
-      remove(ref(db, `empresas/${id}`)).then(() => {
-        registrarLogSistema("🔥 BAJA EMPRESA", `Eliminada: ${id}`);
-        window.cancelarEdicionEmpresa();
-      });
-    }
-  });
-
-  // BOTÓN GUARDAR NUEVA EMPRESA
-  document.getElementById('btnGuardarEmpresa').addEventListener('click', async () => {
-    if (!validarFormEmpresa()) return;
-    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
-    
-    // Evitar sobreescribir sin aviso
-    if (db) {
-      const snap = await get(ref(db, `empresas/${id}`));
-      if (snap.exists()) {
-        if (!confirm(`⚠️ El ID "${id}" YA EXISTE.\n¿Sobreescribir con datos nuevos?`)) return;
-      }
-    }
-
-    const datos = obtenerDatosFormularioEmpresa();
-    if (db) {
-      set(ref(db, `empresas/${id}`), datos).then(() => {
-        registrarLogSistema("✅ NUEVA EMPRESA", `Registrada: ${id} - ${datos.nombre}`);
-        window.cancelarEdicionEmpresa();
-      });
-    }
-  });
-
-  // BOTÓN ACTUALIZAR (MODO EDICIÓN)
-  document.getElementById('btnActualizarEmpresa').addEventListener('click', () => {
-    if (!validarFormEmpresa() || !idEmpresaEdicionActiva || !db) return;
-    const datos = obtenerDatosFormularioEmpresa();
-    
-    update(ref(db, `empresas/${idEmpresaEdicionActiva}`), datos).then(() => {
-      registrarLogSistema("✏️ EMPRESA ACTUALIZADA", `Modificada: ${idEmpresaEdicionActiva}`);
-      window.cancelarEdicionEmpresa();
-    });
-  });
-
-  // BOTÓN CANCELAR EDICIÓN
-  document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', window.cancelarEdicionEmpresa);
-
-  // PROBAR CONEXIÓN FIREBASE
+  
+  // ✅ 6. Probar conexión
   document.getElementById('btnProbarConexion').addEventListener('click', async () => {
     const estado = document.getElementById('estadoConexionApi');
     estado.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="color:#f59e0b;"></i> Probando...';
-    
     if (!db) {
-      setTimeout(() => estado.innerHTML = '<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Sin BD inicializada', 800);
+      setTimeout(() => estado.innerHTML = '<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Sin conexión', 600);
       return;
     }
     try {
-      await get(ref(db, 'empresas'));
-      estado.innerHTML = '<i class="fas fa-circle-check" style="color:#10b981;"></i> ✅ Firebase CONECTADO';
-      registrarLogSistema("Sistema", "Conexión verificada OK");
+      await db.ref('empresas').once('value');
+      estado.innerHTML = '<i class="fas fa-circle-check" style="color:#10b981;"></i> CONEXIÓN EXITOSA';
+      registrarLogSistema("Sistema", "Conexión verificada");
     } catch (err) {
-      estado.innerHTML = `<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> ❌ Error: ${err.message}`;
+      estado.innerHTML = `<i class="fas fa-circle-xmark" style="color:#ef4444;"></i> Error: ${err.message}`;
     }
   });
-
-  // BUSCADOR EMPRESAS (mantener evento original)
-  document.getElementById('buscarEmpresaInput').addEventListener('input', window.renderizarTablaEmpresas);
+  
+  // ✅ 7. Copiar enlace GitHub
+  document.getElementById('btnCopiarLink').addEventListener('click', async () => {
+    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+    if (!id) return alert('❌ Escribe un ID primero');
+    try {
+      await navigator.clipboard.writeText(BASE_URL_GITHUB + id);
+      const btn = document.getElementById('btnCopiarLink');
+      const txt = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+      setTimeout(() => btn.innerHTML = txt, 1800);
+    } catch (err) { alert('Error al copiar'); }
+  });
+  
+  // ✅ 8. Botones formulario empresas
+  document.getElementById('btnLimpiarFormEmpresa').addEventListener('click', () => {
+    if (confirm('¿Limpiar formulario?')) cancelarEdicionEmpresa();
+  });
+  
+  document.getElementById('btnBorrarIdEmpresa').addEventListener('click', () => {
+    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+    if (!id) return alert('❌ Escribe un ID primero');
+    eliminarEmpresaSistema(id);
+  });
+  
+  document.getElementById('btnGuardarEmpresa').addEventListener('click', async () => {
+    if (!validarFormEmpresa() || !db) return;
+    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
+    const snap = await db.ref(`empresas/${id}`).once('value');
+    if (snap.exists() && !confirm(`El ID "${id}" ya existe. ¿Sobreescribir?`)) return;
+    
+    db.ref(`empresas/${id}`).set(obtenerDatosFormularioEmpresa())
+      .then(() => {
+        registrarLogSistema("NUEVA EMPRESA", `${id} - ${obtenerDatosFormularioEmpresa().nombre}`);
+        cancelarEdicionEmpresa();
+      });
+  });
+  
+  document.getElementById('btnActualizarEmpresa').addEventListener('click', () => {
+    if (!validarFormEmpresa() || !idEmpresaEdicionActiva || !db) return;
+    db.ref(`empresas/${idEmpresaEdicionActiva}`).update(obtenerDatosFormularioEmpresa())
+      .then(() => {
+        registrarLogSistema("EMPRESA ACTUALIZADA", idEmpresaEdicionActiva);
+        cancelarEdicionEmpresa();
+      });
+  });
+  
+  document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', cancelarEdicionEmpresa);
+  
+  // ✅ 9. Selectores
+  document.getElementById('buscarEmpresaInput').addEventListener('input', renderizarTablaEmpresas);
+  document.getElementById('secEmpresaSelect').addEventListener('change', actualizarSelectoresVacantes);
+  document.getElementById('buscarReclutadorInput').addEventListener('input', renderizarTablaReclutadores);
+  document.getElementById('buscarPostulanteInput').addEventListener('input', renderizarTablaPostulantes);
+  
+  // ✅ 10. Reclutadores
+  document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
+    const id = document.getElementById('recIdInput').value.trim();
+    if (!id) return alert('❌ ID obligatorio');
+    const datos = {
+      nombre: document.getElementById('recNombreInput').value.trim(),
+      telefono: document.getElementById('recTelefonoInput').value.trim(),
+      estatus: document.getElementById('recEstatusSelect').value
+    };
+    if (db) db.ref(`reclutadores/${id}`).set(datos).then(() => {
+      ['recIdInput','recNombreInput','recTelefonoInput'].forEach(id => document.getElementById(id).value = "");
+      registrarLogSistema("RECLUTADOR", `Nuevo: ${id}`);
+    });
+  });
+  
+  document.getElementById('btnActualizarReclutador').addEventListener('click', () => {
+    if (!idReclutadorEdicionActiva || !db) return;
+    const datos = {
+      nombre: document.getElementById('recNombreInput').value.trim(),
+      telefono: document.getElementById('recTelefonoInput').value.trim(),
+      estatus: document.getElementById('recEstatusSelect').value
+    };
+    db.ref(`reclutadores/${idReclutadorEdicionActiva}`).update(datos).then(() => {
+      idReclutadorEdicionActiva = null;
+      document.getElementById('recIdInput').disabled = false;
+      ['recIdInput','recNombreInput','recTelefonoInput'].forEach(id => document.getElementById(id).value = "");
+      document.getElementById('btnGuardarReclutador').style.display = "block";
+      document.getElementById('btnActualizarReclutador').style.display = "none";
+      document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
+    });
+  });
+  
+  document.getElementById('btnCancelarEdicionReclutador').addEventListener('click', () => {
+    idReclutadorEdicionActiva = null;
+    document.getElementById('recIdInput').disabled = false;
+    ['recIdInput','recNombreInput','recTelefonoInput'].forEach(id => document.getElementById(id).value = "");
+    document.getElementById('btnGuardarReclutador').style.display = "block";
+    document.getElementById('btnActualizarReclutador').style.display = "none";
+    document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
+  });
+  
+  // ✅ 11. Postulantes
+  document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
+    document.getElementById('panelEdicionPostulante').classList.remove('open');
+  });
+  
+  document.getElementById('btnGuardarCambiosPostulante').addEventListener('click', () => {
+    const id = document.getElementById('editPostulanteId').value;
+    if (!id || !db) return;
+    db.ref(`postulantes/${id}`).update({
+      estatus: document.getElementById('editPostulanteEstatus').value,
+      diaEntrevista: document.getElementById('editPostulanteDia').value,
+      horaCita: document.getElementById('editPostulanteHora').value,
+      reclutadorAsignado: document.getElementById('editPostulanteReclutador').value,
+      notasInternas: document.getElementById('editPostulanteNotas').value
+    }).then(() => {
+      document.getElementById('panelEdicionPostulante').classList.remove('open');
+      registrarLogSistema("Postulantes", `Actualizado: ${id}`);
+    });
+  });
+  
+  // ✅ 12. Limpiar logs
+  document.getElementById('btnLimpiarLogsPantalla').addEventListener('click', () => {
+    document.getElementById('consolaSistemaLogs').innerHTML = 
+      '<div class="log-item"><span class="log-time">[SISTEMA]</span> <span class="log-action" style="color:#10b981;">Consola limpiada</span></div>';
+  });
 });
 </script>
-</body> 
+</body>
 </html>

@@ -933,59 +933,225 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     </div>
   </div>
 
-  <!-- PESTAÑA 4: ESTADÍSTICAS DEMOGRÁFICAS -->
-  <div id="tab-tres" class="tab-content">
+  // PESTAÑA 4 - ESTADÍSTICAS DEMOGRÁFICAS (MODIFICADA: SOLO CONTEOS REALES DE DEMANDA)
+window.renderizarEstadisticasPestañaTres = function() {
+    // ==============================================
+    // SECCIÓN 1: CANDIDATOS (se mantiene igual)
+    // ==============================================
+    const totalCand = listaPostulantesGlobal.length;
+    let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
+    let ciudades = {};
     
-    <!-- SECCIÓN 1: DEMOGRÁFICOS DE CANDIDATOS -->
-    <div class="demo-section">
-      <div class="demo-data">
-        <h3>Datos Demográficos - Candidatos</h3>
-        <ul class="data-list">
-          <li><strong>Total Registrados:</strong> <span id="cand-total">Cargando...</span></li>
-          <li><strong>Edad Promedio:</strong> <span id="cand-edad">Cargando...</span></li>
-          <li><strong>Ubicación Principal:</strong> <span id="cand-ubicacion">Cargando...</span></li>
-        </ul>
-      </div>
-      <div class="demo-chart">
-        <canvas id="chartCandidatos"></canvas>
-      </div>
-    </div>
+    listaPostulantesGlobal.forEach(p => {
+        const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
+        if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') hombres++;
+        else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') mujeres++;
+        
+        const edad = parseInt(p.edad, 10);
+        if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
+        
+        const ciudad = p.direccion || p.origen || "No especificada";
+        ciudades[ciudad] = (ciudades[ciudad] || 0) + 1;
+    });
+    
+    const edadPromedio = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
+    let ubicacionPrincipal = "No especificada";
+    let maxUbi = 0;
+    for (let key in ciudades) {
+        if (ciudades[key] > maxUbi) { maxUbi = ciudades[key]; ubicacionPrincipal = key; }
+    }
+    
+    // Actualizar textos de candidatos
+    document.getElementById('cand-total').textContent = totalCand;
+    document.getElementById('cand-edad').textContent = `${edadPromedio} años`;
+    document.getElementById('cand-ubicacion').textContent = ubicacionPrincipal;
+    
+    // Gráfico 1: Género de Candidatos
+    const ctxCand = document.getElementById('chartCandidatos');
+    if (ctxCand) {
+        if (chartCandidatosInst) chartCandidatosInst.destroy();
+        chartCandidatosInst = new Chart(ctxCand, {
+            type: 'doughnut',
+            data: {
+                labels: ['Hombres', 'Mujeres'],
+                datasets: [{
+                    data: [hombres, mujeres],
+                    backgroundColor: ['#38bdf8', '#f472b6'],
+                    borderColor: '#18273c',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#f1f5f9' } } }
+            }
+        });
+    }
 
-    <hr class="divider">
+    // ==============================================
+    // SECCIÓN 2: VACANTES (NUEVA: SOLO DEMANDA REAL)
+    // ==============================================
+    // Contar postulantes POR VACANTE (datos reales, no promedios)
+    const conteoVacantes = {};
+    listaPostulantesGlobal.forEach(p => {
+        const vacante = (p.vacanteInteres || p.vacante || "Sin especificar").toString().toUpperCase().trim();
+        conteoVacantes[vacante] = (conteoVacantes[vacante] || 0) + 1;
+    });
+    
+    // Ordenar de MAYOR a MENOR demanda
+    const vacantesOrdenadas = Object.entries(conteoVacantes)
+        .sort((a, b) => b[1] - a[1]);
+    
+    // Datos para textos
+    const totalVacantesSistema = listaVacantesGlobal.length;
+    const vacantesActivas = listaVacantesGlobal.filter(v => v.estatus === 'disponible').length;
+    const vacanteTop = vacantesOrdenadas[0] ? vacantesOrdenadas[0][0] : "Sin datos";
+    const vacanteTopCantidad = vacantesOrdenadas[0] ? vacantesOrdenadas[0][1] : 0;
+    
+    // Actualizar textos de vacantes (SIN PROMEDIOS)
+    document.getElementById('vac-activas').textContent = `${vacantesActivas} de ${totalVacantesSistema} totales`;
+    document.getElementById('vac-area').textContent = vacanteTop;
+    document.getElementById('vac-sueldo').textContent = `${vacanteTopCantidad} postulantes`; // Antes era sueldo promedio → AHORA es demanda real
+    
+    // Datos para gráfico (TOP 7 más solicitadas)
+    const topVacantesLabels = vacantesOrdenadas.slice(0, 7).map(v => v[0]);
+    const topVacantesData = vacantesOrdenadas.slice(0, 7).map(v => v[1]);
+    
+    // Gráfico 2: Vacantes MÁS SOLICITADAS (barras horizontales para leer nombres mejor)
+    const ctxVac = document.getElementById('chartVacantes');
+    if (ctxVac) {
+        if (chartVacantesInst) chartVacantesInst.destroy();
+        chartVacantesInst = new Chart(ctxVac, {
+            type: 'bar',
+            data: {
+                labels: topVacantesLabels.length ? topVacantesLabels : ["Sin datos aún"],
+                datasets: [{
+                    label: 'Cantidad de Postulantes',
+                    data: topVacantesData.length ? topVacantesData : [0],
+                    backgroundColor: [
+                        'rgba(255, 102, 0, 0.9)',
+                        'rgba(139, 92, 246, 0.85)',
+                        'rgba(16, 185, 129, 0.85)',
+                        'rgba(56, 189, 248, 0.85)',
+                        'rgba(244, 114, 182, 0.85)',
+                        'rgba(245, 158, 11, 0.85)',
+                        'rgba(239, 68, 68, 0.85)'
+                    ],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y', // HORIZONTAL (mejor para nombres largos de vacantes)
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#18273c',
+                        titleColor: '#fff',
+                        bodyColor: '#f1f5f9',
+                        callbacks: {
+                            label: function(ctx) {
+                                return `${ctx.parsed.x} postulante(s)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { color: '#94a3b8', stepSize: 1 },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    y: {
+                        ticks: { color: '#f1f5f9', font: { size: 11 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
 
-    <!-- SECCIÓN 2: DEMOGRÁFICOS DE VACANTES -->
-    <div class="demo-section">
-      <div class="demo-data">
-        <h3>Datos Demográficos - Vacantes</h3>
-        <ul class="data-list">
-          <li><strong>Vacantes Activas:</strong> <span id="vac-activas">Cargando...</span></li>
-          <li><strong>Área más Buscada:</strong> <span id="vac-area">Cargando...</span></li>
-          <li><strong>Sueldo Promedio:</strong> <span id="vac-sueldo">Cargando...</span></li>
-        </ul>
-      </div>
-      <div class="demo-chart">
-        <canvas id="chartVacantes"></canvas>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- SECCIÓN 3: DEMOGRÁFICOS DE EMPRESAS -->
-    <div class="demo-section">
-      <div class="demo-data">
-        <h3>Datos Demográficos - Empresas</h3>
-        <ul class="data-list">
-          <li><strong>Empresas Aliadas:</strong> <span id="emp-total">Cargando...</span></li>
-          <li><strong>Giro Principal:</strong> <span id="emp-giro">Cargando...</span></li>
-          <li><strong>Región Activa:</strong> <span id="emp-region">Cargando...</span></li>
-        </ul>
-      </div>
-      <div class="demo-chart">
-        <canvas id="chartEmpresas"></canvas>
-      </div>
-    </div>
-
-  </div>
+    // ==============================================
+    // SECCIÓN 3: EMPRESAS (NUEVA: SOLO DEMANDA REAL)
+    // ==============================================
+    // Contar postulantes POR EMPRESA (datos reales)
+    const conteoEmpresas = {};
+    listaPostulantesGlobal.forEach(p => {
+        const empresa = (p.empresa || p.empresaId || "Sin especificar").toString().trim();
+        conteoEmpresas[empresa] = (conteoEmpresas[empresa] || 0) + 1;
+    });
+    
+    // Ordenar de MAYOR a MENOR demanda
+    const empresasOrdenadas = Object.entries(conteoEmpresas)
+        .sort((a, b) => b[1] - a[1]);
+    
+    // Datos para textos
+    const totalEmpresas = listaEmpresasGlobal.length;
+    const empresaTop = empresasOrdenadas[0] ? empresasOrdenadas[0][0] : "Sin datos";
+    const empresaTopCantidad = empresasOrdenadas[0] ? empresasOrdenadas[0][1] : 0;
+    
+    // Actualizar textos de empresas (SIN GIROS HARCODEADOS NI REGIONES FALSAS)
+    document.getElementById('emp-total').textContent = `${totalEmpresas} aliadas`;
+    document.getElementById('emp-giro').textContent = empresaTop; // Antes era "Manufactura/Servicios" fijo → AHORA es la #1 real
+    document.getElementById('emp-region').textContent = `${empresaTopCantidad} postulantes`; // Antes era región → AHORA es demanda real
+    
+    // Datos para gráfico (TOP 5 más demandadas)
+    const topEmpresasLabels = empresasOrdenadas.slice(0, 5).map(e => e[0]);
+    const topEmpresasData = empresasOrdenadas.slice(0, 5).map(e => e[1]);
+    
+    // Gráfico 3: Empresas MÁS DEMANDADAS (gráfico de anillo para comparación rápida)
+    const ctxEmp = document.getElementById('chartEmpresas');
+    if (ctxEmp) {
+        if (chartEmpresasInst) chartEmpresasInst.destroy();
+        chartEmpresasInst = new Chart(ctxEmp, {
+            type: 'doughnut',
+            data: {
+                labels: topEmpresasLabels.length ? topEmpresasLabels : ["Sin datos aún"],
+                datasets: [{
+                    data: topEmpresasData.length ? topEmpresasData : [1],
+                    backgroundColor: [
+                        '#ff6600',
+                        '#8b5cf6',
+                        '#10b981',
+                        '#38bdf8',
+                        '#f472b6'
+                    ],
+                    borderColor: '#18273c',
+                    borderWidth: 3,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#f1f5f9',
+                            padding: 12,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#18273c',
+                        callbacks: {
+                            label: function(ctx) {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? Math.round((ctx.parsed / total) * 100) : 0;
+                                return `${ctx.parsed} postulantes (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+};
 
   <!-- PESTAÑA 5 - CONTROL DE RECLUTADORES -->
   <div id="tabReclutadores" class="tab-content">

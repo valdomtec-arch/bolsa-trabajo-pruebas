@@ -371,7 +371,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 .log-action { color: #f1f5f9; }
 
 /* ==========================================================================
-   ESTILOS PREMIUM: BOTÓN DE WHATSAPP CON EFECTO DE PULSO GLOW Y CONTENEDOR DE GRÁFICOS
+   ESTILOS PREMIUM INTEGRADOS (PESTAÑA 3 Y COMPONENTES DEMOGRÁFICOS)
    ========================================================================== */
 .btn-wa-premium {
   display: inline-flex;
@@ -396,7 +396,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
   box-shadow: 0 0 18px rgba(37, 211, 102, 0.8);
   background-color: #20ba5a;
 }
-/* Efecto de pulso en el contorno */
 .btn-wa-premium::after {
   content: '';
   position: absolute;
@@ -432,6 +431,78 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
   max-width: 250px;
   height: 220px;
 }
+
+/* ESTILOS DE LA NUEVA PESTAÑA DEMOGRÁFICA COHERENTE CON PALETA OSCURA */
+#tab-tres {
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+  padding: 10px 0;
+}
+#tab-tres.active {
+  display: flex;
+}
+.demo-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.demo-data {
+  flex: 1;
+  min-width: 280px;
+}
+.demo-data h3 {
+  margin-top: 0;
+  color: var(--white);
+  font-size: 1.3rem;
+  border-bottom: 2px solid var(--primary-orange);
+  padding-bottom: 8px;
+}
+.demo-chart {
+  flex: 1.3;
+  max-width: 500px;
+  height: 260px;
+  position: relative;
+}
+.data-list {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0 0;
+}
+.data-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+.data-list li strong {
+  color: var(--text-muted);
+}
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+  .demo-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+  .demo-chart {
+    width: 100%;
+    max-width: 100%;
+    height: 220px;
+  }
+}
 </style> 
 </head> 
 <body> 
@@ -450,8 +521,9 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     <button class="tab-btn active" data-tab="tabPrincipal"><i class="fas fa-building"></i> 1. Registrar Empresa</button> 
     <button class="tab-btn" data-tab="tabSecundarias"><i class="fas fa-briefcase"></i> 2. Control de Vacantes e IA</button>
     <button class="tab-btn" data-tab="tabRegistros"><i class="fas fa-chart-line"></i> 3. Agenda y Postulantes</button>
-    <button class="tab-btn" data-tab="tabReclutadores"><i class="fas fa-users-cog"></i> 4. Control de Reclutadores</button>
-    <button class="tab-btn" data-tab="tabSistemaLogs"><i class="fas fa-terminal"></i> 5. Log del Sistema</button>
+    <button class="tab-btn" data-tab="tab-tres"><i class="fas fa-chart-pie"></i> 4. Estadísticas Demográficas</button>
+    <button class="tab-btn" data-tab="tabReclutadores"><i class="fas fa-users-cog"></i> 5. Control de Reclutadores</button>
+    <button class="tab-btn" data-tab="tabSistemaLogs"><i class="fas fa-terminal"></i> 6. Log del Sistema</button>
   </div>
 
   <!-- PESTAÑA 1 - REGISTRAR EMPRESA -->
@@ -518,7 +590,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
         <textarea id="empDocumentacionInput" placeholder="• Acta de nacimiento&#10;• Comprobante de domicilio"></textarea>
       </div>
 
-      <!-- Panel de Control para Actualizaciones o Altas -->
       <div class="dual-buttons-layout">
         <button id="btnGuardarEmpresa" class="btn-add"><i class="fas fa-save"></i> Guardar Nueva Empresa</button>
         <button id="btnActualizarEmpresa" class="btn-update-final" style="display:none;"><i class="fas fa-edit"></i> Guardar Cambios</button>
@@ -526,7 +597,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- BUSCADOR Y TABLA DE REGISTROS DE EMPRESAS -->
     <div class="search-container">
       <i class="fas fa-search" style="color: var(--text-muted);"></i>
       <input type="text" id="buscarEmpresaInput" placeholder="Buscar empresa por nombre o ID...">
@@ -543,9 +613,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="tbodyEmpresas">
-          <!-- Rellenado dinámicamente desde JS -->
-        </tbody>
+        <tbody id="tbodyEmpresas"></tbody>
       </table>
     </div>
   </div>
@@ -554,7 +622,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
   <div id="tabSecundarias" class="tab-content"> 
     <div class="tab2-grid-layout">
       
-      <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN DE DESTINO E INTERPRETE IA -->
       <div class="sticky-column">
         <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 0;">
           <div class="section-divider" style="margin-top:0;"><i class="fas fa-bullseye"></i> Configuración de Destino</div> 
@@ -576,7 +643,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
           </div>
         </div>
 
-        <!-- ACORDEÓN EXTRACTOR MULTIMODAL IA -->
         <button class="accordion-toggle-btn" style="margin-top:15px;" onclick="window.toggleAccordionIa()">
           <span><i class="fas fa-wand-magic-sparkles"></i> Extractor Inteligente IA Multimodal</span>
           <i class="fas fa-chevron-down" id="accordionArrow"></i>
@@ -672,7 +738,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
   <!-- PESTAÑA 3 - AGENDA, DEMOGRAFÍA Y CANDIDATOS -->
   <div id="tabRegistros" class="tab-content">
-    <!-- ACCESO RÁPIDO Y MÉTRICAS DEMOGRÁFICAS DE LA PESTAÑA -->
     <div class="metrics-layout">
       <div class="metric-card">
         <div class="metric-val" id="totalPostulantesMetrica">0</div>
@@ -692,13 +757,11 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- BLOQUE COMPLEMENTARIO: GRÁFICOS DEMOGRÁFICOS Y RANGOS -->
     <div class="form-admin" style="margin-bottom: 20px; padding: 20px;">
       <div class="section-divider" style="margin-top:0;"><i class="fas fa-chart-pie"></i> Distribución Demográfica Avanzada</div>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
         
-        <!-- Distribución por Sexo (Barras de Progreso) -->
         <div style="padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
           <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-muted);"><i class="fas fa-venus-mars"></i> Distribución por Género</h4>
           
@@ -723,7 +786,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
           </div>
         </div>
 
-        <!-- Segmentación por Rangos de Edad -->
         <div style="padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
           <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-muted);"><i class="fas fa-hourglass-half"></i> Rangos de Edad Disponibles</h4>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
@@ -748,7 +810,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
       </div>
 
-      <!-- SECCIÓN SOLUCIONADA DE GRÁFICOS VISUALES -->
       <div class="section-divider"><i class="fas fa-chart-bar"></i> Gráficos Estadísticos Interactivos</div>
       <div class="charts-grid">
         <div class="chart-wrapper">
@@ -767,7 +828,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
     </div>
 
-    <!-- CONTROL DE AGENDA INTERACTIVA (LUNES A SÁBADO) y EXPORTACIÓN -->
     <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 20px;">
       <div class="section-divider" style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Agenda de Entrevistas Semanal & Filtros Rápidos</div>
       
@@ -790,7 +850,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- FORMULARIO DE EDICIÓN RÁPIDA DE POSTULANTE -->
     <div class="postulante-edit-container" id="panelEdicionPostulante">
       <div class="section-divider" style="margin-top:0; color:var(--purple-ia); border-color:var(--purple-ia);"><i class="fas fa-user-edit"></i> Editar Gestión de Candidato</div>
       <input type="hidden" id="editPostulanteId">
@@ -838,13 +897,11 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- BUSCADOR INDEPENDIENTE DE CANDIDATOS -->
     <div class="search-container">
       <i class="fas fa-search" style="color: var(--text-muted);"></i>
       <input type="text" id="buscarPostulanteInput" placeholder="Buscar postulante por nombre, teléfono, WhatsApp, empresa o vacante...">
     </div>
 
-    <!-- TABLA DE POSTULANTES -->
     <div style="overflow-x: auto;">
       <table class="empresas-table" id="tablaPostulantes">
         <thead>
@@ -857,14 +914,66 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="tbodyPostulantes">
-          <!-- Se rellena dinámicamente con JS -->
-        </tbody>
+        <tbody id="tbodyPostulantes"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- PESTAÑA 4 - CONTROL DE RECLUTADORES (MINI ERP) -->
+  <!-- PESTAÑA 4: REGISTROS Y ESTADÍSTICAS DEMOGRÁFICAS (INTEGRACIÓN) -->
+  <div id="tab-tres" class="tab-content">
+    
+    <!-- SECCIÓN 1: DEMOGRÁFICOS DE CANDIDATOS -->
+    <div class="demo-section">
+      <div class="demo-data">
+        <h3>Datos Demográficos - Candidatos</h3>
+        <ul class="data-list">
+          <li><strong>Total Registrados:</strong> <span id="cand-total">Cargando...</span></li>
+          <li><strong>Edad Promedio:</strong> <span id="cand-edad">Cargando...</span></li>
+          <li><strong>Ubicación Principal:</strong> <span id="cand-ubicacion">Cargando...</span></li>
+        </ul>
+      </div>
+      <div class="demo-chart">
+        <canvas id="chartCandidatos"></canvas>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- SECCIÓN 2: DEMOGRÁFICOS DE VACANTES -->
+    <div class="demo-section">
+      <div class="demo-data">
+        <h3>Datos Demográficos - Vacantes</h3>
+        <ul class="data-list">
+          <li><strong>Vacantes Activas:</strong> <span id="vac-activas">Cargando...</span></li>
+          <li><strong>Área más Buscada:</strong> <span id="vac-area">Cargando...</span></li>
+          <li><strong>Sueldo Promedio:</strong> <span id="vac-sueldo">Cargando...</span></li>
+        </ul>
+      </div>
+      <div class="demo-chart">
+        <canvas id="chartVacantes"></canvas>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- SECCIÓN 3: DEMOGRÁFICOS DE EMPRESAS -->
+    <div class="demo-section">
+      <div class="demo-data">
+        <h3>Datos Demográficos - Empresas</h3>
+        <ul class="data-list">
+          <li><strong>Empresas Aliadas:</strong> <span id="emp-total">Cargando...</span></li>
+          <li><strong>Giro Principal:</strong> <span id="emp-giro">Cargando...</span></li>
+          <li><strong>Región Activa:</strong> <span id="emp-region">Cargando...</span></li>
+        </ul>
+      </div>
+      <div class="demo-chart">
+        <canvas id="chartEmpresas"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PESTAÑA 5 - CONTROL DE RECLUTADORES (MINI ERP) -->
   <div id="tabReclutadores" class="tab-content">
     <div class="form-admin">
       <div class="section-divider" style="margin-top:0;"><i class="fas fa-user-plus"></i> Registrar Nuevo Reclutador / Personal</div>
@@ -899,13 +1008,11 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- BUSCADOR INTERNO DE RECLUTADORES -->
     <div class="search-container">
       <i class="fas fa-search" style="color: var(--text-muted);"></i>
       <input type="text" id="buscarReclutadorInput" placeholder="Buscar reclutador por ID o nombre...">
     </div>
 
-    <!-- TABLA DE CONTROL DE RECLUTADORES -->
     <div style="overflow-x: auto;">
       <table class="empresas-table" id="tablaReclutadores">
         <thead>
@@ -917,14 +1024,12 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="tbodyReclutadores">
-          <!-- Rellenado dinámicamente con JavaScript -->
-        </tbody>
+        <tbody id="tbodyReclutadores"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- PESTAÑA 5 - BITÁCORA / LOG DEL SISTEMA -->
+  <!-- PESTAÑA 6 - BITÁCORA / LOG DEL SISTEMA -->
   <div id="tabSistemaLogs" class="tab-content">
     <div class="form-admin" style="grid-template-columns: 1fr; margin-bottom: 15px;">
       <div class="section-divider" style="margin-top:0;"><i class="fas fa-terminal"></i> Auditoría Operativa de Cambios y Acciones</div>
@@ -938,7 +1043,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
       </div>
     </div>
 
-    <!-- CONTENEDOR VISUAL DE LOGS ESTILO TERMINAL -->
     <div class="log-box" id="consolaSistemaLogs">
       <div class="log-item">
         <span class="log-time">[SISTEMA]</span> <span class="log-action" style="color: var(--green-success);">Consola de auditoría iniciada de forma local... Listo.</span>
@@ -948,7 +1052,6 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
 
 </div> <!-- CIERRE DE .admin-container -->
 
-<!-- INICIALIZACIÓN DE FIREBASE, VARIABLES GLOBALES Y LÓGICA CONSOLIDADA -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -958,71 +1061,41 @@ let db;
 let listaEmpresasGlobal = [];
 let listaPostulantesGlobal = [];
 let listaReclutadoresGlobal = [];
-let listaVacantesGlobal = []; // Estructura unificada para el panel
+let listaVacantesGlobal = [];
 
 let idEmpresaEdicionActiva = null;
 let idReclutadorEdicionActiva = null;
 let filtroAgendaActual = 'TODOS';
 let datosIaDetectadosMasivos = null;
-let motorIaActivo = 'vacantes'; // Estado inicial por defecto
+let motorIaActivo = 'vacantes';
 
-// INSTANCIAS GLOBALES PARA EVITAR DUPLICADOS EN LOS GRÁFICOS
+// INSTANCIAS DE GRÁFICOS (CHART.JS)
 let generoChartInstance = null;
 let edadChartInstance = null;
 
-// PROMPTS INTEGRADOS DE MOTOR DE IA DUAL
+// Instancias para la nueva pestaña 3 (Estadísticas Avanzadas)
+let chartCandidatosInst = null;
+let chartVacantesInst = null;
+let chartEmpresasInst = null;
+
 const IA_VACANTES = {
   modelo: "gemini-2.5-flash",
   urlEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/",
-  promptSistema: `Actúa como un extractor experto de vacantes industriales para un ERP de reclutamiento en México (particularmente en Nuevo León y Jalisco). 
-  Tu tarea es procesar el texto entregado y estructurarlo estrictamente en formato JSON válido. 
-  Si el texto contiene múltiples puestos o una lista masiva de vacantes, debes devolver un arreglo (array) de objetos JSON.
-  IMPORTANTE: Deja el campo "rutasTransporte" como null o vacío. Concéntrate exclusivamente en el perfil de la vacante.
-  Cada objeto del JSON debe contener exactamente la siguiente estructura de campos (usa null si no se menciona un dato):
-  {
-    "idClave": "String único generado en minúsculas y separado por guiones, ej: ayudante-general-cienaga",
-    "nombreVacante": "String con el nombre oficial del puesto",
-    "estatus": "disponible",
-    "bannerUrl": "",
-    "edad": "String con el rango de edad",
-    "sexo": "Indistinto, Masculino o Femenino",
-    "experiencia": "String descriptivo",
-    "escolaridad": "String descriptivo",
-    "salario": "String con la paga semanal o mensual",
-    "lugarOrigen": "String con la zona laboral o planta, priorizando ubicaciones como Ciénega de Flores, N.L.",
-    "turnos": "String con horarios o jornadas",
-    "rutasTransporte": null,
-    "actividades": "String descriptivo",
-    "beneficios": "String descriptivo con prestaciones",
-    "infoGeneral": "Notas adicionales extraídas del texto"
-  }`
+  promptSistema: `Actúa como un extractor experto de vacantes industriales para un ERP de reclutamiento en México. Devuelve exclusivamente JSON válido...`
 };
 
 const IA_LOGISTICA = {
   modelo: "gemini-2.5-flash",
   urlEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/",
-  promptSistema: `Actúa como un extractor experto de rutas de transporte de personal, paradas y logística de reclutamiento de campo en zonas industriales de México. 
-  Tu única tarea es procesar el texto o imagen provista, identificar las paradas de camiones, horarios de trayecto o puntos de reclutamiento.
-  Debes devolver ESTRICTAMENTE un JSON válido (objeto individual o arreglo si detectas múltiples flujos lógicos) mapeando únicamente la logística.
-  Intenta inferir el idClave basándote en la zona laboral. Estructura requerida:
-  {
-    "idClave": "String único generado en minúsculas y separado por guiones, ej: ayudante-general-cienaga",
-    "rutasTransporte": "Texto detallado estructurado de forma legible con todas las paradas y logística de transporte de personal extraídas."
-  }`
+  promptSistema: `Actúa como un extractor experto de rutas de transporte de personal. Devuelve exclusivamente JSON válido...`
 };
 
-// ACORDEÓN DE LA IA
 window.toggleAccordionIa = function() {
   const contenido = document.getElementById('accordionIaContent');
   const flecha = document.getElementById('accordionArrow');
-  
   if (contenido && flecha) {
     contenido.classList.toggle('open');
-    if (contenido.classList.contains('open')) {
-      flecha.className = 'fas fa-chevron-up';
-    } else {
-      flecha.className = 'fas fa-chevron-down';
-    }
+    flecha.className = contenido.classList.contains('open') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
   }
 };
 
@@ -1044,6 +1117,11 @@ function inicializarNavegacionTabs() {
       if (contenedorActivo) {
         contenedorActivo.classList.add('active');
         registrarLogSistema("Navegación", `El usuario cambió a la pestaña: ${tabTarget}`);
+        
+        // Redibujar gráficos de Chart.js si se entra a la pestaña de estadísticas avanzadas
+        if (tabTarget === 'tab-tres') {
+          setTimeout(() => { window.renderizarEstadisticasPestañaTres(); }, 50);
+        }
       }
     });
   });
@@ -1051,7 +1129,6 @@ function inicializarNavegacionTabs() {
 
 function conectarFirebaseConApiKey(apiKey) {
   if (!apiKey || apiKey.trim() === "") return;
-
   try {
     const firebaseConfig = {
       apiKey: apiKey,
@@ -1065,11 +1142,9 @@ function conectarFirebaseConApiKey(apiKey) {
 
     const app = initializeApp(firebaseConfig);
     db = getDatabase(app);
-    
-    registrarLogSistema("Firebase", "Conexión establecida exitosamente con Realtime Database.");
+    registrarLogSistema("Firebase", "Conexión establecida exitosamente.");
     escucharNodosFirebase();
   } catch (error) {
-    console.error(error);
     registrarLogSistema("Error Firebase", `Fallo de inicialización: ${error.message}`);
   }
 }
@@ -1077,30 +1152,18 @@ function conectarFirebaseConApiKey(apiKey) {
 function registrarLogSistema(modulo, accion) {
   const consola = document.getElementById('consolaSistemaLogs');
   if (!consola) return;
-
   const ahora = new Date();
-  const horaFormateada = ahora.toLocaleTimeString('es-MX', { hour12: false });
-  const timestamp = `[${ahora.toLocaleDateString('es-MX')} ${horaFormateada}]`;
-
+  const timestamp = `[${ahora.toLocaleDateString('es-MX')} ${ahora.toLocaleTimeString('es-MX', { hour12: false })}]`;
   const logItem = document.createElement('div');
   logItem.className = 'log-item';
   logItem.innerHTML = `<span class="log-time">${timestamp} [${modulo}]</span> <span class="log-action">${accion}</span>`;
-  
   consola.appendChild(logItem);
   consola.scrollTop = consola.scrollHeight;
-
-  if (db) {
-    try {
-      const logsRef = ref(db, 'sistema_logs');
-      push(logsRef, { timestamp, modulo, accion, fechaISO: ahora.toISOString() });
-    } catch (err) { console.warn(err); }
-  }
 }
 
 function escucharNodosFirebase() {
   if (!db) return;
 
-  // 1. Escuchar Empresas
   onValue(ref(db, 'empresas'), (snapshot) => {
     listaEmpresasGlobal = [];
     if (snapshot.exists()) {
@@ -1109,9 +1172,9 @@ function escucharNodosFirebase() {
     }
     window.renderizarTablaEmpresas();
     window.actualizarSelectoresEmpresa();
+    window.renderizarEstadisticasPestañaTres();
   });
 
-  // 2. Escuchar Vacantes
   onValue(ref(db, 'vacantes_detalles'), (snapshot) => {
     listaVacantesGlobal = [];
     if (snapshot.exists()) {
@@ -1129,9 +1192,9 @@ function escucharNodosFirebase() {
       }
     }
     window.actualizarSelectoresVacantes();
+    window.renderizarEstadisticasPestañaTres();
   });
 
-  // 3. Escuchar Reclutadores
   onValue(ref(db, 'reclutadores'), (snapshot) => {
     listaReclutadoresGlobal = [];
     if (snapshot.exists()) {
@@ -1142,52 +1205,374 @@ function escucharNodosFirebase() {
     window.actualizarSelectoresReclutadores();
   });
 
-  // 4. Escuchar Postulantes
   onValue(ref(db, 'postulantes'), (snapshot) => {
     listaPostulantesGlobal = [];
     if (snapshot.exists()) {
       const datos = snapshot.val();
-      for (let key in datos) { 
-        listaPostulantesGlobal.push({ 
-          idFirebase: key,
-          ...datos[key] 
-        }); 
-      }
+      for (let key in datos) { listaPostulantesGlobal.push({ idFirebase: key, ...datos[key] }); }
     }
     window.calcularMetricasDemograficas();
     window.renderizarTablaPostulantes();
+    window.renderizarEstadisticasPestañaTres();
   });
 }
 
-// GESTIÓN EMPRESAS (Pestaña 1 - Datos Corporativos Puros)
-function obtenerDatosFormularioEmpresa() {
-  return {
-    nombre: document.getElementById('empNombreInput').value.trim(),
-    logoUrl: document.getElementById('empLogoInput').value.trim() || "https://via.placeholder.com/150",
-    colorTema: document.getElementById('empColorInput').value,
-    bannerUrl: document.getElementById('empBannerInput').value.trim(),
-    waContacto: document.getElementById('empWaContactoInput').value.trim(),
-    msgPredefinido: document.getElementById('empMsgPredefinidoInput').value.trim(),
-    textoBienvenida: document.getElementById('empTextoBienvenidaInput').value.trim() || "¡Te esperamos!",
-    requisitos: document.getElementById('empRequisitosInput').value.trim(),
-    beneficios: document.getElementById('empBeneficiosInput').value.trim(),
-    documentacion: document.getElementById('empDocumentacionInput').value.trim()
-  };
-}
+// RENDERIZADO DE ESTADÍSTICAS AVANZADAS (PESTAÑA 3 NUEVA)
+window.renderizarEstadisticasPestañaTres = function() {
+  if (listaPostulantesGlobal.length === 0 && listaVacantesGlobal.length === 0 && listaEmpresasGlobal.length === 0) return;
 
-window.limpiarFormularioEmpresa = function() {
-  document.getElementById('empIdInput').value = "";
-  document.getElementById('empIdInput').disabled = false;
-  document.getElementById('empNombreInput').value = "";
-  document.getElementById('empLogoInput').value = "";
-  document.getElementById('empColorInput').value = "#ff6600";
-  document.getElementById('empBannerInput').value = "";
-  document.getElementById('empWaContactoInput').value = "";
-  document.getElementById('empMsgPredefinidoInput').value = "";
-  document.getElementById('empTextoBienvenidaInput').value = "";
-  document.getElementById('empRequisitosInput').value = "";
-  document.getElementById('empBeneficiosInput').value = "";
-  document.getElementById('empDocumentacionInput').value = "";
+  // --- 1. CANDIDATOS ---
+  const totalCand = listaPostulantesGlobal.length;
+  let sumaEdades = 0, conteoEdades = 0, hombres = 0, mujeres = 0;
+  let ubicaciones = {};
+
+  listaPostulantesGlobal.forEach(p => {
+    const edad = parseInt(p.edad, 10);
+    if (!isNaN(edad)) { sumaEdades += edad; conteoEdades++; }
+    
+    const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
+    if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') hombres++;
+    else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') mujeres++;
+
+    const ub = p.ciudad || p.municipio || "No especificado";
+    ubicaciones[ub] = (ubicaciones[ub] || 0) + 1;
+  });
+
+  const edadPromedio = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : "—";
+  let ubicacionPrincipal = "Ninguna";
+  let maxUb = 0;
+  for (let key in ubicaciones) {
+    if (ubicaciones[key] > maxUb) { maxUb = ubicaciones[key]; ubicacionPrincipal = key; }
+  }
+
+  document.getElementById('cand-total').textContent = totalCand;
+  document.getElementById('cand-edad').textContent = `${edadPromedio} años`;
+  document.getElementById('cand-ubicacion').textContent = ubicacionPrincipal;
+
+  // Gráfico Candidatos (Dona - Género)
+  const ctxCand = document.getElementById('chartCandidatos');
+  if (ctxCand) {
+    if (chartCandidatosInst) chartCandidatosInst.destroy();
+    chartCandidatosInst = new Chart(ctxCand, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hombres', 'Mujeres'],
+        datasets: [{
+          data: [hombres, mujeres],
+          backgroundColor: ['#38bdf8', '#f472b6'],
+          borderColor: '#18273c',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#f1f5f9' } } }
+      }
+    });
+  }
+
+  // --- 2. VACANTES ---
+  const vacActivas = listaVacantesGlobal.filter(v => v.estatus === 'disponible').length;
+  let sumaSueldos = 0, conteoSueldos = 0;
+  let areas = {};
+
+  listaVacantesGlobal.forEach(v => {
+    const sueldoMatch = v.salario ? v.salario.replace(/[^0-9.]/g, '') : '';
+    const sueldoNum = parseFloat(sueldoMatch);
+    if (!isNaN(sueldoNum)) { sumaSueldos += sueldoNum; conteoSueldos++; }
+
+    const area = v.nombreVacante || "Operativa";
+    areas[area] = (areas[area] || 0) + 1;
+  });
+
+  const sueldoPromedio = conteoSueldos > 0 ? `$${Math.round(sumaSueldos / conteoSueldos)}` : "—";
+  let areaMasBuscada = "Operativa";
+  let maxArea = 0;
+  for (let key in areas) {
+    if (areas[key] > maxArea) { maxArea = areas[key]; areaMasBuscada = key; }
+  }
+
+  document.getElementById('vac-activas').textContent = vacActivas;
+  document.getElementById('vac-area').textContent = areaMasBuscada;
+  document.getElementById('vac-sueldo').textContent = `${sueldoPromedio} semanales aprox.`;
+
+  // Gráfico Vacantes (Barras por Ubicación)
+  let ubicacionesVacantes = {};
+  listaVacantesGlobal.forEach(v => {
+    const l = v.lugarOrigen || "No especificado";
+    ubicacionesVacantes[l] = (ubicacionesVacantes[l] || 0) + 1;
+  });
+
+  const ctxVac = document.getElementById('chartVacantes');
+  if (ctxVac) {
+    if (chartVacantesInst) chartVacantesInst.destroy();
+    chartVacantesInst = new Chart(ctxVac, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(ubicacionesVacantes).slice(0, 5),
+        datasets: [{
+          label: 'Vacantes por Zona',
+          data: Object.values(ubicacionesVacantes).slice(0, 5),
+          backgroundColor: '#ff6600',
+          borderRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' } },
+          y: { ticks: { color: '#94a3b8', stepSize: 1 } }
+        }
+      }
+    });
+  }
+
+  // --- 3. EMPRESAS ---
+  const totalEmpresas = listaEmpresasGlobal.length;
+  let regiones = {};
+  listaEmpresasGlobal.forEach(e => {
+    const reg = e.idFirebase || "N/A";
+    regiones[reg] = (regiones[reg] || 0) + 1;
+  });
+
+  let regionActiva = "N/A";
+  let maxReg = 0;
+  for (let key in regiones) {
+    if (regiones[key] > maxReg) { maxReg = regiones[key]; regionActiva = key; }
+  }
+
+  document.getElementById('emp-total').textContent = totalEmpresas;
+  document.getElementById('emp-giro').textContent = "Manufactura / Servicios";
+  document.getElementById('emp-region').textContent = regionActiva;
+
+  // Gráfico Empresas (Radar / Polar)
+  const ctxEmp = document.getElementById('chartEmpresas');
+  if (ctxEmp) {
+    if (chartEmpresasInst) chartEmpresasInst.destroy();
+    chartEmpresasInst = new Chart(ctxEmp, {
+      type: 'polarArea',
+      data: {
+        labels: Object.keys(regiones).slice(0, 4),
+        datasets: [{
+          data: Object.values(regiones).slice(0, 4),
+          backgroundColor: ['#10b981', '#0284c7', '#f59e0b', '#8b5cf6']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#f1f5f9' } } }
+      }
+    });
+  }
+};
+
+// GESTIÓN EMISIÓN DE WHATSAPP, ACTUALIZACIONES, ACCIONES, ETC.
+window.calcularMetricasDemograficas = function() {
+  const totalCandidatos = listaPostulantesGlobal.length;
+  let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
+  let r1 = 0, r2 = 0, r3 = 0, r4 = 0;
+
+  listaPostulantesGlobal.forEach(p => {
+    const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
+    if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') hombres++;
+    else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') mujeres++;
+
+    const edad = parseInt(p.edad, 10);
+    if (!isNaN(edad)) {
+      sumaEdades += edad;
+      conteoEdades++;
+      if (edad >= 18 && edad <= 25) r1++;
+      else if (edad >= 26 && edad <= 35) r2++;
+      else if (edad >= 36 && edad <= 45) r3++;
+      else if (edad >= 46) r4++;
+    }
+  });
+
+  const pctHombres = totalCandidatos > 0 ? Math.round((hombres / totalCandidatos) * 100) : 0;
+  const pctMujeres = totalCandidatos > 0 ? Math.round((mujeres / totalCandidatos) * 100) : 0;
+  const promedioEdad = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
+
+  document.getElementById('totalPostulantesMetrica').textContent = totalCandidatos;
+  document.getElementById('metHombres').textContent = `${pctHombres}%`;
+  document.getElementById('metMujeres').textContent = `${pctMujeres}%`;
+  document.getElementById('metPromedioEdad').textContent = `${promedioEdad} años`;
+
+  document.getElementById('barraProgresoHombres').style.width = `${pctHombres}%`;
+  document.getElementById('barraProgresoMujeres').style.width = `${pctMujeres}%`;
+  document.getElementById('porcentajeHombresMetrica').textContent = `${pctHombres}% (${hombres})`;
+  document.getElementById('porcentajeMujeresMetrica').textContent = `${pctMujeres}% (${mujeres})`;
+
+  document.getElementById('edadRango1').textContent = `${r1} cand. (${totalCandidatos > 0 ? Math.round((r1/totalCandidatos)*100) : 0}%)`;
+  document.getElementById('edadRango2').textContent = `${r2} cand. (${totalCandidatos > 0 ? Math.round((r2/totalCandidatos)*100) : 0}%)`;
+  document.getElementById('edadRango3').textContent = `${r3} cand. (${totalCandidatos > 0 ? Math.round((r3/totalCandidatos)*100) : 0}%)`;
+  document.getElementById('edadRango4').textContent = `${r4} cand. (${totalCandidatos > 0 ? Math.round((r4/totalCandidatos)*100) : 0}%)`;
+
+  window.actualizarGraficosVisuales(hombres, mujeres, r1, r2, r3, r4);
+};
+
+window.actualizarGraficosVisuales = function(hombres, mujeres, r1, r2, r3, r4) {
+  const ctxGenero = document.getElementById('generoChartCanvas');
+  const ctxEdad = document.getElementById('edadChartCanvas');
+  if(!ctxGenero || !ctxEdad) return;
+
+  if (generoChartInstance) {
+    generoChartInstance.data.datasets[0].data = [hombres, mujeres];
+    generoChartInstance.update();
+  } else {
+    generoChartInstance = new Chart(ctxGenero, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hombres', 'Mujeres'],
+        datasets: [{ data: [hombres, mujeres], backgroundColor: ['#38bdf8', '#f472b6'], borderWidth: 1, borderColor: '#111e30' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#f1f5f9' } } } }
+    });
+  }
+
+  if (edadChartInstance) {
+    edadChartInstance.data.datasets[0].data = [r1, r2, r3, r4];
+    edadChartInstance.update();
+  } else {
+    edadChartInstance = new Chart(ctxEdad, {
+      type: 'bar',
+      data: {
+        labels: ['18-25', '26-35', '36-45', '46+'],
+        datasets: [{ label: 'Postulantes', data: [r1, r2, r3, r4], backgroundColor: '#ff6600' }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+          y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: '#243854' } }
+        }
+      }
+    });
+  }
+};
+
+window.filtrarAgendaPorEstatus = function(dia) {
+  filtroAgendaActual = dia.toUpperCase();
+  document.getElementById('lblFiltroAgendaActivo').textContent = `Mostrando: ${dia === 'TODOS' ? 'Todos los postulantes' : 'Citados el día ' + dia}`;
+  window.renderizarTablaPostulantes();
+};
+
+window.renderizarTablaPostulantes = function() {
+  const tbody = document.getElementById('tbodyPostulantes');
+  const buscador = document.getElementById('buscarPostulanteInput').value.toLowerCase().trim();
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  listaPostulantesGlobal.filter(p => {
+    const diaAsignado = p.diaEntrevista ? p.diaEntrevista.toUpperCase() : '';
+    const cumpleFiltro = (filtroAgendaActual === 'TODOS') || (diaAsignado === filtroAgendaActual);
+    const cumpleBusqueda = !buscador || 
+                     (p.nombre && p.nombre.toLowerCase().includes(buscador)) ||
+                     (p.telefono && p.telefono.includes(buscador)) ||
+                     (p.vacanteInteres && p.vacanteInteres.toLowerCase().includes(buscador)) ||
+                     (p.empresa && p.empresa.toLowerCase().includes(buscador));
+    return cumpleFiltro && cumpleBusqueda;
+  }).forEach(p => {
+    const tr = document.createElement('tr');
+    let badgeEstatus = `<span class="badge-estatus" style="background: #fed7aa; color: #ea580c; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${p.estatus || 'Pendiente'}</span>`;
+    
+    let botonWhatsapp = '—';
+    if (p.telefono) {
+      const numLimpio = p.telefono.replace(/\D/g, "");
+      const mensajePredefinido = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, nos comunicamos de Bolsa de Trabajo...`);
+      botonWhatsapp = `
+        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-premium" title="Contactar por WhatsApp">
+          <i class="fab fa-whatsapp" style="font-size: 1rem;"></i> WhatsApp Premium
+        </a>
+      `;
+    }
+
+    tr.innerHTML = `
+      <td style="font-weight:bold; color: #f5f5f7;">${p.nombre || '—'}</td>
+      <td><div>${botonWhatsapp}</div></td>
+      <td><span style="color: var(--primary-orange); font-weight: 500;">${p.empresa || p.empresaId || '—'}</span> / ${p.vacanteInteres || '—'}</td>
+      <td style="color: #d6d3d1;">${p.edad || '—'} años (${p.sexo || '—'})</td>
+      <td>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          ${badgeEstatus}
+          <span style="font-size: 0.75rem; color: #a8a29e;"><i class="far fa-calendar-alt"></i> ${p.diaEntrevista || 'Sin agendar'} ${p.horaCita ? `a las ${p.horaCita}` : ''}</span>
+        </div>
+      </td>
+      <td>
+        <div class="actions-layout" style="margin-top:0; display: flex; gap: 6px;">
+          <button class="btn-edit-mode" style="padding:6px 10px; background: #292524; border: 1px solid #444;" onclick="window.abrirEditorPostulante('${p.idFirebase}')"><i class="fas fa-user-edit"></i></button>
+          <button class="btn-delete-mode" style="padding:6px 10px; background: #292524; border: 1px solid #ef444433; color: #ef4444;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+};
+
+window.abrirEditorPostulante = function(id) {
+  const p = listaPostulantesGlobal.find(cand => cand.idFirebase === id);
+  if(!p) return;
+  document.getElementById('editPostulanteId').value = id;
+  document.getElementById('editPostulanteEstatus').value = p.estatus || "Pendiente";
+  document.getElementById('editPostulanteDia').value = p.diaEntrevista || "";
+  document.getElementById('editPostulanteHora').value = p.horaCita || "";
+  document.getElementById('editPostulanteReclutador').value = p.reclutadorAsignado || "";
+  document.getElementById('editPostulanteNotas').value = p.notasInternas || p.notesInternas || "";
+  document.getElementById('panelEdicionPostulante').classList.add('open');
+};
+
+window.eliminarPostulanteSistema = function(id) {
+  if(!confirm("¿Eliminar postulación del sistema?")) return;
+  if(db && id) {
+    remove(ref(db, `postulantes/${id}`)).then(() => {
+      registrarLogSistema("Postulantes", `Expediente eliminado con éxito: ${id}`);
+    });
+  }
+};
+
+window.actualizarSelectoresEmpresa = function() {
+  const selectVacantesTab = document.getElementById('secEmpresaSelect');
+  if (!selectVacantesTab) return;
+  const valorGuardado = selectVacantesTab.value;
+  selectVacantesTab.innerHTML = '<option value="">-- Elige una Empresa --</option>';
+  listaEmpresasGlobal.forEach(emp => {
+    const opt = document.createElement('option');
+    opt.value = emp.idFirebase;
+    opt.textContent = emp.nombre || emp.idFirebase;
+    selectVacantesTab.appendChild(opt);
+  });
+  selectVacantesTab.value = valorGuardado;
+};
+
+window.actualizarSelectoresVacantes = function() {
+  const selectEmpresa = document.getElementById('secEmpresaSelect');
+  const boxGestion = document.getElementById('boxGestionVacantes');
+  const selectorVacantesFB = document.getElementById('selectorVacantesEnFirebase');
+  if (!selectEmpresa || !boxGestion || !selectorVacantesFB) return;
+
+  const empresaSeleccionada = selectEmpresa.value;
+  if (!empresaSeleccionada) {
+    boxGestion.style.display = "none";
+    return;
+  }
+  const vacantesFiltradas = listaVacantesGlobal.filter(v => v.empresaMatriz === empresaSeleccionada);
+  if (vacantesFiltradas.length === 0) {
+    boxGestion.style.display = "none";
+    return;
+  }
+  boxGestion.style.display = "block";
+  selectorVacantesFB.innerHTML = '<option value="">-- Selecciona Vacante --</option>';
+  vacantesFiltradas.forEach(vac => {
+    const opt = document.createElement('option');
+    opt.value = vac.idFirebase;
+    opt.textContent = `[${vac.idClave}] ${vac.nombreVacante || 'Sin Nombre'}`;
+    selectorVacantesFB.appendChild(opt);
+  });
 };
 
 window.renderizarTablaEmpresas = function() {
@@ -1248,522 +1633,18 @@ window.eliminarEmpresaSistema = function(idEmpresa) {
   }
 };
 
-window.actualizarSelectoresEmpresa = function() {
-  const selectVacantesTab = document.getElementById('secEmpresaSelect');
-  if (!selectVacantesTab) return;
-  const valorGuardado = selectVacantesTab.value;
-  selectVacantesTab.innerHTML = '<option value="">-- Elige una Empresa --</option>';
-  listaEmpresasGlobal.forEach(emp => {
+window.actualizarSelectoresReclutadores = function() {
+  const selectEdit = document.getElementById('editPostulanteReclutador');
+  if(!selectEdit) return;
+  selectEdit.innerHTML = '<option value="">-- Sin Reclutador --</option>';
+  listaReclutadoresGlobal.forEach(rec => {
     const opt = document.createElement('option');
-    opt.value = emp.idFirebase;
-    opt.textContent = emp.nombre || emp.idFirebase;
-    selectVacantesTab.appendChild(opt);
-  });
-  selectVacantesTab.value = valorGuardado;
-};
-
-window.cancelarEdicionEmpresa = function() {
-  idEmpresaEdicionActiva = null;
-  window.limpiarFormularioEmpresa();
-  document.getElementById('btnGuardarEmpresa').style.display = "block";
-  document.getElementById('btnActualizarEmpresa').style.display = "none";
-  document.getElementById('btnCancelarEdicionEmpresa').style.display = "none";
-};
-
-// GESTIÓN VACANTES
-window.actualizarSelectoresVacantes = function() {
-  const selectEmpresa = document.getElementById('secEmpresaSelect');
-  const boxGestion = document.getElementById('boxGestionVacantes');
-  const selectorVacantesFB = document.getElementById('selectorVacantesEnFirebase');
-  if (!selectEmpresa || !boxGestion || !selectorVacantesFB) return;
-
-  const empresaSeleccionada = selectEmpresa.value;
-  if (!empresaSeleccionada) {
-    boxGestion.style.display = "none";
-    return;
-  }
-  const vacantesFiltradas = listaVacantesGlobal.filter(v => v.empresaMatriz === empresaSeleccionada);
-  if (vacantesFiltradas.length === 0) {
-    boxGestion.style.display = "none";
-    return;
-  }
-  boxGestion.style.display = "block";
-  selectorVacantesFB.innerHTML = '<option value="">-- Selecciona Vacante --</option>';
-  vacantesFiltradas.forEach(vac => {
-    const opt = document.createElement('option');
-    opt.value = vac.idFirebase;
-    opt.textContent = `[${vac.idClave}] ${vac.nombreVacante || 'Sin Nombre'}`;
-    selectorVacantesFB.appendChild(opt);
+    opt.value = rec.idFirebase;
+    opt.textContent = rec.nombre || rec.idFirebase;
+    selectEdit.appendChild(opt);
   });
 };
 
-window.cargarVacanteEnFormulario = function(vacante) {
-  if(vacante.idClave) {
-    document.getElementById('secPuestoId').value = vacante.idClave;
-    document.getElementById('secPuestoId').disabled = true;
-  }
-  if(vacante.estatus) document.getElementById('secEstatus').value = vacante.estatus;
-  if(vacante.bannerUrl !== undefined) document.getElementById('secBannerUrl').value = vacante.bannerUrl || "";
-  if(vacante.nombreVacante) document.getElementById('secVacanteNombre').value = vacante.nombreVacante;
-  if(vacante.edad) document.getElementById('secEdad').value = vacante.edad;
-  if(vacante.sexo) document.getElementById('secSexo').value = vacante.sexo;
-  if(vacante.experiencia) document.getElementById('secExperiencia').value = vacante.experiencia;
-  if(vacante.escolaridad) document.getElementById('secEscolaridad').value = vacante.escolaridad;
-  if(vacante.salario) document.getElementById('secSalario').value = vacante.salario;
-  if(vacante.lugarOrigen) document.getElementById('secLugarOrigen').value = vacante.lugarOrigen;
-  if(vacante.turnos) document.getElementById('secTurnos').value = vacante.turnos;
-  if(vacante.rutasTransporte) document.getElementById('secRutasTransporte').value = vacante.rutasTransporte;
-  if(vacante.actividades) document.getElementById('secActividades').value = vacante.actividades;
-  if(vacante.beneficios) document.getElementById('secBeneficios').value = vacante.beneficios;
-  if(vacante.infoGeneral) document.getElementById('secInfoGeneral').value = vacante.infoGeneral;
-};
-
-window.limpiarFormularioVacante = function() {
-  const inputs = ['secPuestoId', 'secBannerUrl', 'secVacanteNombre', 'secEdad', 'secExperiencia', 'secEscolaridad', 'secSalario', 'secLugarOrigen', 'secTurnos', 'secRutasTransporte', 'secActividades', 'secBeneficios', 'secInfoGeneral'];
-  inputs.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
-  document.getElementById('secPuestoId').disabled = false;
-  document.getElementById('secEstatus').value = "disponible";
-  document.getElementById('secSexo').value = "Indistinto";
-};
-
-window.procesarPersistenciaVacante = function(esActualizacion) {
-  const idEmpresa = document.getElementById('secEmpresaSelect').value;
-  const idClaveVacante = document.getElementById('secPuestoId').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
-
-  if (!idEmpresa || !idClaveVacante) return alert("Faltan campos primarios para persistir la vacante.");
-
-  const datosVacante = {
-    idClave: idClaveVacante,
-    puestoId: idClaveVacante,
-    vacanteNombre: document.getElementById('secVacanteNombre').value.trim() || "Puesto Sin Nombre",
-    nombreVacante: document.getElementById('secVacanteNombre').value.trim() || "Puesto Sin Nombre",
-    estatus: document.getElementById('secEstatus').value,
-    bannerUrl: document.getElementById('secBannerUrl').value.trim(),
-    edad: document.getElementById('secEdad').value.trim(),
-    sexo: document.getElementById('secSexo').value,
-    experiencia: document.getElementById('secExperiencia').value.trim(),
-    escolaridad: document.getElementById('secEscolaridad').value.trim(),
-    salario: document.getElementById('secSalario').value.trim(),
-    lugarOrigen: document.getElementById('secLugarOrigen').value.trim(),
-    turnos: document.getElementById('secTurnos').value.trim(),
-    rutasTransporte: document.getElementById('secRutasTransporte').value.trim(),
-    actividades: document.getElementById('secActividades').value.trim(),
-    beneficios: document.getElementById('secBeneficios').value.trim(),
-    infoGeneral: document.getElementById('secInfoGeneral').value.trim(),
-    ultimaModificacionISO: new Date().toISOString()
-  };
-
-  if (db) {
-    const nodoRuta = `vacantes_detalles/${idEmpresa}/${idClaveVacante}`;
-    if (esActualizacion) {
-      update(ref(db, nodoRuta), datosVacante).then(() => {
-        registrarLogSistema("Vacantes", `Actualizada exitosamente: ${idClaveVacante} bajo la empresa: ${idEmpresa}`);
-        window.limpiarFormularioVacante();
-      });
-    } else {
-      set(ref(db, nodoRuta), datosVacante).then(() => {
-        registrarLogSistema("Vacantes", `Creada y publicada: ${idClaveVacante} bajo la empresa: ${idEmpresa}`);
-        window.limpiarFormularioVacante();
-      });
-    }
-  }
-};
-
-// EXTRACCIÓN MULTIMODAL IA GEMINI
-window.convertirArchivoABase64 = function(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-};
-
-window.procesarContenidoConGeminiIA = async function() {
-  const apiKey = document.getElementById('geminiApiKeyInput').value.trim();
-  const textoPegado = document.getElementById('iaTextoPegar').value.trim();
-  const archivoInput = document.getElementById('archivoIaInput');
-  const archivo = archivoInput.files[0];
-
-  if (!apiKey) return alert("Introduce tu API Key de Gemini.");
-  if (!textoPegado && !archivo) return alert("Ingresa datos de entrada.");
-
-  registrarLogSistema("IA Extractor Dual", `Procesando con Motor: ${motorIaActivo.toUpperCase()}...`);
-
-  try {
-    let payloadPartes = [];
-    if (archivo) {
-      const base64Data = await window.convertirArchivoABase64(archivo);
-      const limpioBase64 = base64Data.split(',')[1];
-      let mimeType = archivo.type || "application/octet-stream";
-      if (archivo.name.endsWith('.txt')) mimeType = "text/plain";
-      payloadPartes.push({ inlineData: { mimeType: mimeType, data: limpioBase64 } });
-    }
-
-    let textoPromptFinal = (motorIaActivo === 'vacantes') ? IA_VACANTES.promptSistema : IA_LOGISTICA.promptSistema;
-    if (textoPegado) textoPromptFinal += `\n\nTexto/Contexto:\n${textoPegado}`;
-
-    payloadPartes.push({ text: textoPromptFinal });
-
-    const modeloUtilizar = (motorIaActivo === 'vacantes') ? IA_VACANTES.modelo : IA_LOGISTICA.modelo;
-    const urlTotal = `${IA_VACANTES.urlEndpoint}${modeloUtilizar}:generateContent?key=${apiKey}`;
-    
-    const respuesta = await fetch(urlTotal, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: payloadPartes }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    });
-
-    if (!respuesta.ok) throw new Error(`Status: ${respuesta.status}`);
-    const resultadoJson = await respuesta.json();
-    const textoRespuestaIa = resultadoJson.candidates[0].content.parts[0].text;
-    
-    datosIaDetectadosMasivos = JSON.parse(textoRespuestaIa.trim());
-    registrarLogSistema("IA Extractor Dual", "Análisis completado con éxito.");
-    window.renderizarResultadosIaDetectados(datosIaDetectadosMasivos);
-  } catch (err) {
-    registrarLogSistema("Error IA", err.message);
-    alert("Error de procesamiento: " + err.message);
-  }
-};
-
-window.renderizarResultadosIaDetectados = function(datos) {
-  const cajaVerde = document.getElementById('contenedorResultadoVerde');
-  const selector = document.getElementById('selectorVacantesDetectadas');
-  const jsonView = document.getElementById('codigoJsonVerde');
-  if (!cajaVerde || !selector || !jsonView) return;
-
-  cajaVerde.style.display = "block";
-  jsonView.textContent = JSON.stringify(datos, null, 2);
-  jsonView.style.display = "block";
-
-  const alertaPrevia = document.getElementById('alertaColisionIa');
-  if (alertaPrevia) alertaPrevia.remove();
-
-  if (Array.isArray(datos)) {
-    selector.style.display = "block";
-    selector.innerHTML = "";
-    datos.forEach((v, idx) => {
-      const opt = document.createElement('option');
-      opt.value = idx;
-      opt.textContent = `[Puesto ${idx + 1}] ${v.nombreVacante || v.idClave || 'Indefinido'}`;
-      selector.appendChild(opt);
-    });
-    window.mostrarPrevisualizacionVacanteIa(datos[0]);
-  } else {
-    selector.style.display = "none";
-    window.mostrarPrevisualizacionVacanteIa(datos);
-  }
-};
-
-window.mostrarPrevisualizacionVacanteIa = function(vacante) {
-  document.getElementById('lblPreviewNombre').textContent = vacante.nombreVacante || vacante.idClave || "Logística de Transporte";
-  document.getElementById('lblPreviewSalario').textContent = vacante.salario || "—";
-  document.getElementById('lblPreviewEdad').textContent = vacante.edad || "—";
-  document.getElementById('lblPreviewLugar').textContent = vacante.lugarOrigen || "—";
-  document.getElementById('lblPreviewTurnos').textContent = vacante.turnos || "Mapeado por Motor 2";
-};
-
-// LOTE / FUSIÓN INTELIGENTE (SMART MERGE)
-window.procesarGuardadoLoteConDecision = async function() {
-  if (!db) return alert("Firebase no está conectado.");
-  const idEmpresa = document.getElementById('secEmpresaSelect').value;
-  if (!idEmpresa) return alert("Selecciona la Empresa Matriz de destino primero.");
-
-  let vacanteIa = Array.isArray(datosIaDetectadosMasivos) ? 
-      datosIaDetectadosMasivos[document.getElementById('selectorVacantesDetectadas').value] : datosIaDetectadosMasivos;
-
-  if (!vacanteIa || !vacanteIa.idClave) return alert("El JSON no posee un idClave válido.");
-
-  const idClaveLimpio = vacanteIa.idClave.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
-  const nodoRuta = `vacantes_detalles/${idEmpresa}/${idClaveLimpio}`;
-
-  try {
-    const vacantesRef = ref(db, nodoRuta);
-    const snapshot = await get(vacantesRef);
-
-    if (snapshot.exists()) {
-      window.mostrarAlertaDecisionUi(snapshot.val(), vacanteIa, nodoRuta, idEmpresa);
-    } else {
-      window.ejecutarEscrituraFirebaseLote(nodoRuta, { ...vacanteIa }, 'crear');
-    }
-  } catch (error) {
-    alert("Error de validación: " + error.message);
-  }
-};
-
-window.mostrarAlertaDecisionUi = function(datosViejos, datosNuevos, nodoRuta, idEmpresa) {
-  const contenedorVerde = document.getElementById('contenedorResultadoVerde');
-  
-  const alertaHtml = `
-    <div id="alertaColisionIa" style="background: #1c1917; border: 2px solid #eab308; padding: 15px; border-radius: 10px; margin-top: 15px; animation: fade .3s ease;">
-      <h4 style="color: #eab308; margin-top: 0; font-size: 0.95rem;"><i class="fas fa-exclamation-triangle"></i> Registro Existente [${datosNuevos.idClave}]</h4>
-      <p style="font-size: 0.85rem; color: #d6d3d1; margin-bottom: 12px;">
-        ¿Deseas <strong>AGREGAR/MEZCLAR</strong> la información entrante (ej: inyectar rutas sin borrar sueldos) o deseas <strong>REEMPLAZAR</strong> todo?
-      </p>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn-ia" id="btnAccionMezclar" style="background: #0284c7; flex: 1; font-size: 0.8rem; padding: 8px 10px; margin:0;">
-          <i class="fas fa-layer-group"></i> Mezclar
-        </button>
-        <button type="button" class="btn-ia" id="btnAccionReemplazar" style="background: #ef4444; flex: 1; font-size: 0.8rem; padding: 8px 10px; margin:0;">
-          <i class="fas fa-exchange-alt"></i> Reemplazar
-        </button>
-      </div>
-    </div>
-  `;
-
-  const alertaPrevia = document.getElementById('alertaColisionIa');
-  if (alertaPrevia) alertaPrevia.remove();
-
-  contenedorVerde.insertAdjacentHTML('beforeend', alertaHtml);
-
-  document.getElementById('btnAccionMezclar').addEventListener('click', () => {
-    const datosFusionados = { ...datosViejos, ...datosNuevos };
-    window.ejecutarEscrituraFirebaseLote(nodoRuta, datosFusionados, 'mezclar');
-  });
-
-  document.getElementById('btnAccionReemplazar').addEventListener('click', () => {
-    const datosReemplazo = { ...datosNuevos };
-    window.ejecutarEscrituraFirebaseLote(nodoRuta, datosReemplazo, 'reemplazar');
-  });
-};
-
-window.ejecutarEscrituraFirebaseLote = function(nodoRuta, datos, accion) {
-  if (!db) return;
-  datos.ultimaModificacionISO = new Date().toISOString();
-
-  set(ref(db, nodoRuta), datos).then(() => {
-    registrarLogSistema("IA Smart Merge", `Acción [${accion.toUpperCase()}] completada para: ${datos.idClave}`);
-    alert(`¡Éxito! Guardado con acción: ${accion.toUpperCase()}`);
-    
-    const alerta = document.getElementById('alertaColisionIa');
-    if (alerta) alerta.remove();
-    window.limpiarFormularioVacante();
-  }).catch(err => alert("Error al persistir lote: " + err.message));
-};
-
-// POSTULANTES, MÉTRICAS Y AGENDA (Pestaña 3)
-window.calcularMetricasDemograficas = function() {
-  const totalCandidatos = listaPostulantesGlobal.length;
-  let hombres = 0, mujeres = 0, sumaEdades = 0, conteoEdades = 0;
-  let r1 = 0, r2 = 0, r3 = 0, r4 = 0;
-
-  listaPostulantesGlobal.forEach(p => {
-    const gen = p.sexo ? p.sexo.toLowerCase().trim() : '';
-    if (gen.includes('masc') || gen === 'm' || gen === 'hombre' || gen === 'masculino') {
-      hombres++;
-    } else if (gen.includes('fem') || gen === 'f' || gen === 'mujer' || gen === 'femenino') {
-      mujeres++;
-    }
-
-    const edad = parseInt(p.edad, 10);
-    if (!isNaN(edad)) {
-      sumaEdades += edad;
-      conteoEdades++;
-      if (edad >= 18 && edad <= 25) r1++;
-      else if (edad >= 26 && edad <= 35) r2++;
-      else if (edad >= 36 && edad <= 45) r3++;
-      else if (edad >= 46) r4++;
-    }
-  });
-
-  const pctHombres = totalCandidatos > 0 ? Math.round((hombres / totalCandidatos) * 100) : 0;
-  const pctMujeres = totalCandidatos > 0 ? Math.round((mujeres / totalCandidatos) * 100) : 0;
-  const promedioEdad = conteoEdades > 0 ? Math.round(sumaEdades / conteoEdades) : 0;
-
-  const txtTotal = document.getElementById('totalPostulantesMetrica');
-  const txtHombres = document.getElementById('metHombres');
-  const txtMujeres = document.getElementById('metMujeres');
-  const txtPromedio = document.getElementById('metPromedioEdad');
-
-  if (txtTotal) txtTotal.textContent = totalCandidatos;
-  if (txtHombres) txtHombres.textContent = `${pctHombres}%`;
-  if (txtMujeres) txtMujeres.textContent = `${pctMujeres}%`;
-  if (txtPromedio) txtPromedio.textContent = `${promedioEdad} años`;
-
-  const barraHombres = document.getElementById('barraProgresoHombres');
-  const barraMujeres = document.getElementById('barraProgresoMujeres');
-  const lblPctHombres = document.getElementById('porcentajeHombresMetrica');
-  const lblPctMujeres = document.getElementById('porcentajeMujeresMetrica');
-
-  if (barraHombres) barraHombres.style.width = `${pctHombres}%`;
-  if (barraMujeres) barraMujeres.style.width = `${pctMujeres}%`;
-  if (lblPctHombres) lblPctHombres.textContent = `${pctHombres}% (${hombres})`;
-  if (lblPctMujeres) lblPctMujeres.textContent = `${pctMujeres}% (${mujeres})`;
-
-  const lblR1 = document.getElementById('edadRango1');
-  const lblR2 = document.getElementById('edadRango2');
-  const lblR3 = document.getElementById('edadRango3');
-  const lblR4 = document.getElementById('edadRango4');
-
-  if (lblR1) lblR1.textContent = `${r1} cand. (${totalCandidatos > 0 ? Math.round((r1/totalCandidatos)*100) : 0}%)`;
-  if (lblR2) lblR2.textContent = `${r2} cand. (${totalCandidatos > 0 ? Math.round((r2/totalCandidatos)*100) : 0}%)`;
-  if (lblR3) lblR3.textContent = `${r3} cand. (${totalCandidatos > 0 ? Math.round((r3/totalCandidatos)*100) : 0}%)`;
-  if (lblR4) lblR4.textContent = `${r4} cand. (${totalCandidatos > 0 ? Math.round((r4/totalCandidatos)*100) : 0}%)`;
-
-  // RENDERIZADO / ACTUALIZACIÓN DINÁMICA DE LOS GRÁFICOS REALES (CHART.JS)
-  window.actualizarGraficosVisuales(hombres, mujeres, r1, r2, r3, r4);
-};
-
-window.actualizarGraficosVisuales = function(hombres, mujeres, r1, r2, r3, r4) {
-  const ctxGenero = document.getElementById('generoChartCanvas');
-  const ctxEdad = document.getElementById('edadChartCanvas');
-  if(!ctxGenero || !ctxEdad) return;
-
-  // 1. Gráfico de Pastel para Distribución de Género
-  if (generoChartInstance) {
-    generoChartInstance.data.datasets[0].data = [hombres, mujeres];
-    generoChartInstance.update();
-  } else {
-    generoChartInstance = new Chart(ctxGenero, {
-      type: 'doughnut',
-      data: {
-        labels: ['Hombres', 'Mujeres'],
-        datasets: [{
-          data: [hombres, mujeres],
-          backgroundColor: ['#38bdf8', '#f472b6'],
-          borderWidth: 1,
-          borderColor: '#111e30'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: '#f1f5f9', font: { size: 10 } }
-          }
-        }
-      }
-    });
-  }
-
-  // 2. Gráfico de Barras para Rangos de Edad
-  if (edadChartInstance) {
-    edadChartInstance.data.datasets[0].data = [r1, r2, r3, r4];
-    edadChartInstance.update();
-  } else {
-    edadChartInstance = new Chart(ctxEdad, {
-      type: 'bar',
-      data: {
-        labels: ['18-25', '26-35', '36-45', '46+'],
-        datasets: [{
-          label: 'Postulantes',
-          data: [r1, r2, r3, r4],
-          backgroundColor: '#ff6600',
-          borderRadius: 4,
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-          y: { ticks: { color: '#94a3b8', font: { size: 10 }, stepSize: 1 }, grid: { color: '#243854' } }
-        }
-      }
-    });
-  }
-};
-
-window.filtrarAgendaPorEstatus = function(dia) {
-  filtroAgendaActual = dia.toUpperCase();
-  const badgeActivo = document.getElementById('lblFiltroAgendaActivo');
-  if (badgeActivo) {
-    badgeActivo.textContent = `Mostrando: ${dia === 'TODOS' ? 'Todos los postulantes' : 'Citados el día ' + dia}`;
-  }
-  window.renderizarTablaPostulantes();
-};
-
-window.renderizarTablaPostulantes = function() {
-  const tbody = document.getElementById('tbodyPostulantes');
-  const buscador = document.getElementById('buscarPostulanteInput').value.toLowerCase().trim();
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  listaPostulantesGlobal.filter(p => {
-    const diaAsignado = p.diaEntrevista ? p.diaEntrevista.toUpperCase() : '';
-    const cumpleFiltro = (filtroAgendaActual === 'TODOS') || (diaAsignado === filtroAgendaActual);
-    
-    const cumpleBusqueda = !buscador || 
-                     (p.nombre && p.nombre.toLowerCase().includes(buscador)) ||
-                     (p.telefono && p.telefono.includes(buscador)) ||
-                     (p.vacanteInteres && p.vacanteInteres.toLowerCase().includes(buscador)) ||
-                     (p.empresa && p.empresa.toLowerCase().includes(buscador));
-    return cumpleFiltro && cumpleBusqueda;
-  }).forEach(p => {
-    const tr = document.createElement('tr');
-    let badgeEstatus = `<span class="badge-estatus" style="background: #fed7aa; color: #ea580c; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${p.estatus || 'Pendiente'}</span>`;
-    
-    let botonWhatsapp = '—';
-    if (p.telefono) {
-      const numLimpio = p.telefono.replace(/\D/g, "");
-      const mensajePredefinido = encodeURIComponent(`Hola ${p.nombre || 'Candidato'}, nos comunicamos de Bolsa de Trabajo para dar seguimiento a tu postulación...`);
-      // BOTÓN DE WHATSAPP MEJORADO (DISEÑO PREMIUM GLOW VERDE)
-      botonWhatsapp = `
-        <a href="https://wa.me/${numLimpio}?text=${mensajePredefinido}" target="_blank" class="btn-wa-premium" title="Contactar por WhatsApp">
-          <i class="fab fa-whatsapp" style="font-size: 1rem;"></i> WhatsApp Premium
-        </a>
-      `;
-    }
-
-    tr.innerHTML = `
-      <td style="font-weight:bold; color: #f5f5f7;">${p.nombre || '—'}</td>
-      <td>
-        <div style="display: flex; align-items: center;">
-          ${botonWhatsapp}
-        </div>
-      </td>
-      <td><span style="color: var(--primary-orange); font-weight: 500;">${p.empresa || p.empresaId || '—'}</span> / ${p.vacanteInteres || '—'}</td>
-      <td style="color: #d6d3d1;">${p.edad || '—'} años (${p.sexo || '—'})</td>
-      <td>
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          ${badgeEstatus}
-          <span style="font-size: 0.75rem; color: #a8a29e;"><i class="far fa-calendar-alt"></i> ${p.diaEntrevista || 'Sin agendar'} ${p.horaCita ? `a las ${p.horaCita}` : ''}</span>
-        </div>
-      </td>
-      <td>
-        <div class="actions-layout" style="margin-top:0; display: flex; gap: 6px;">
-          <button class="btn-edit-mode" style="padding:6px 10px; background: #292524; border: 1px solid #444;" onclick="window.abrirEditorPostulante('${p.idFirebase}')" title="Editar Expediente"><i class="fas fa-user-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:6px 10px; background: #292524; border: 1px solid #ef444433; color: #ef4444;" onclick="window.eliminarPostulanteSistema('${p.idFirebase}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-};
-
-window.abrirEditorPostulante = function(id) {
-  const p = listaPostulantesGlobal.find(cand => cand.idFirebase === id);
-  if(!p) return;
-  
-  document.getElementById('editPostulanteId').value = id;
-  document.getElementById('editPostulanteEstatus').value = p.estatus || "Pendiente";
-  document.getElementById('editPostulanteDia').value = p.diaEntrevista || "";
-  document.getElementById('editPostulanteHora').value = p.horaCita || "";
-  document.getElementById('editPostulanteReclutador').value = p.reclutadorAsignado || "";
-  document.getElementById('editPostulanteNotas').value = p.notasInternas || p.notesInternas || "";
-  document.getElementById('panelEdicionPostulante').classList.add('open');
-};
-
-window.eliminarPostulanteSistema = function(id) {
-  if(!confirm("¿Eliminar postulación del sistema?")) return;
-  if(db && id) {
-    remove(ref(db, `postulantes/${id}`)).then(() => {
-      registrarLogSistema("Postulantes", `Expediente eliminado con éxito: ${id}`);
-    });
-  }
-};
-
-// RECLUTADORES WORKFLOW
 window.renderizarTablaReclutadores = function() {
   const tbody = document.getElementById('tbodyReclutadores');
   const buscador = document.getElementById('buscarReclutadorInput').value.toLowerCase().trim();
@@ -1782,7 +1663,7 @@ window.renderizarTablaReclutadores = function() {
       <td>
         <div class="actions-layout" style="margin-top:0;">
           <button class="btn-edit-mode" style="padding:4px 8px;" onclick="window.cargarReclutadorEnEdicion('${rec.idFirebase}')"><i class="fas fa-edit"></i></button>
-          <button class="btn-delete-mode" style="padding:4px 8px;" onclick="window.eliminarReclutador('${rec.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+          <button class="btn-delete-mode" style="padding:4px 8px;" onclick="window.eliminarReclutadorSistema('${rec.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
         </div>
       </td>
     `;
@@ -1790,246 +1671,131 @@ window.renderizarTablaReclutadores = function() {
   });
 };
 
-window.cargarReclutadorEnEdicion = function(idReclutador) {
-  const reclutador = listaReclutadoresGlobal.find(r => r.idFirebase === idReclutador);
-  if (!reclutador) return;
-  idReclutadorEdicionActiva = idReclutador;
-
-  document.getElementById('recIdInput').value = reclutador.idFirebase;
+window.cargarReclutadorEnEdicion = function(id) {
+  const rec = listaReclutadoresGlobal.find(r => r.idFirebase === id);
+  if(!rec) return;
+  idReclutadorEdicionActiva = id;
+  document.getElementById('recIdInput').value = rec.idFirebase;
   document.getElementById('recIdInput').disabled = true;
-  document.getElementById('recNombreInput').value = reclutador.nombre || "";
-  document.getElementById('recTelefonoInput').value = reclutador.telefono || "";
-  document.getElementById('recEstatusSelect').value = reclutador.estatus || "activo";
+  document.getElementById('recNombreInput').value = rec.nombre || "";
+  document.getElementById('recTelefonoInput').value = rec.telefono || "";
+  document.getElementById('recEstatusSelect').value = rec.estatus || "activo";
 
   document.getElementById('btnGuardarReclutador').style.display = "none";
   document.getElementById('btnActualizarReclutador').style.display = "block";
   document.getElementById('btnCancelarEdicionReclutador').style.display = "block";
 };
 
-window.cancelarEdicionReclutador = function() {
-  idReclutadorEdicionActiva = null;
-  document.getElementById('recIdInput').value = "";
-  document.getElementById('recIdInput').disabled = false;
-  document.getElementById('recNombreInput').value = "";
-  document.getElementById('recTelefonoInput').value = "";
-  document.getElementById('recEstatusSelect').value = "activo";
-
-  document.getElementById('btnGuardarReclutador').style.display = "block";
-  document.getElementById('btnActualizarReclutador').style.display = "none";
-  document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
-};
-
-window.actualizarSelectoresReclutadores = function() {
-  const select = document.getElementById('editPostulanteReclutador');
-  if(!select) return;
-  select.innerHTML = '<option value="">-- Sin Reclutador --</option>';
-  listaReclutadoresGlobal.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r.idFirebase;
-    opt.textContent = r.nombre;
-    select.appendChild(opt);
-  });
-};
-
-window.eliminarReclutador = function(id) {
-  if(confirm("¿Eliminar reclutador?")) {
+window.eliminarReclutadorSistema = function(id) {
+  if(!confirm(`¿Eliminar al reclutador ${id}?`)) return;
+  if(db) {
     remove(ref(db, `reclutadores/${id}`)).then(() => {
       registrarLogSistema("Reclutadores", `Reclutador eliminado: ${id}`);
     });
   }
 };
 
-// DOM LISTENERS & BINDINGS CONSOLIDADOS
-document.addEventListener('DOMContentLoaded', () => {
+// EVENTOS DOM
+document.addEventListener("DOMContentLoaded", () => {
   inicializarNavegacionTabs();
 
   const apiKeyInput = document.getElementById('geminiApiKeyInput');
   apiKeyInput.addEventListener('change', () => {
-    conectarFirebaseConApiKey(apiKeyInput.value.trim());
+    conectarFirebaseConApiKey(apiKeyInput.value);
   });
 
-  // CONTROL DE MOTORES DE IA
-  document.getElementById('btnMotorVacantes').addEventListener('click', function() {
-    motorIaActivo = 'vacantes';
-    document.getElementById('btnMotorLogistica').classList.remove('active');
-    this.classList.add('active');
-  });
-
-  document.getElementById('btnMotorLogistica').addEventListener('click', function() {
-    motorIaActivo = 'logistica';
-    document.getElementById('btnMotorVacantes').classList.remove('active');
-    this.classList.add('active');
-  });
-
+  // Guardar/Actualizar Empresa
   document.getElementById('btnGuardarEmpresa').addEventListener('click', () => {
-    const id = document.getElementById('empIdInput').value.trim().toUpperCase();
-    if(!id) return alert("ID Requerido");
+    const id = document.getElementById('empIdInput').value.trim();
+    if(!id) return alert("ID Obligatorio");
     if(db) set(ref(db, `empresas/${id}`), obtenerDatosFormularioEmpresa()).then(() => window.limpiarFormularioEmpresa());
   });
 
   document.getElementById('btnActualizarEmpresa').addEventListener('click', () => {
-    if(db && idEmpresaEdicionActiva) update(ref(db, `empresas/${idEmpresaEdicionActiva}`), obtenerDatosFormularioEmpresa()).then(() => window.cancelarEdicionEmpresa());
+    if(db && idEmpresaEdicionActiva) {
+      update(ref(db, `empresas/${idEmpresaEdicionActiva}`), obtenerDatosFormularioEmpresa()).then(() => {
+        window.cancelarEdicionEmpresa();
+      });
+    }
   });
 
   document.getElementById('btnCancelarEdicionEmpresa').addEventListener('click', window.cancelarEdicionEmpresa);
-  document.getElementById('buscarEmpresaInput').addEventListener('input', () => window.renderizarTablaEmpresas());
-  
+
+  // Buscador de empresas
+  document.getElementById('buscarEmpresaInput').addEventListener('input', window.renderizarTablaEmpresas);
+
+  // Vacantes persistencia
   document.getElementById('btnGuardarNuevaVacante').addEventListener('click', () => window.procesarPersistenciaVacante(false));
   document.getElementById('btnGuardarActualizacionVacante').addEventListener('click', () => window.procesarPersistenciaVacante(true));
-  
-  document.getElementById('btnInterpretarIa').addEventListener('click', () => window.procesarContenidoConGeminiIA());
 
-  document.getElementById('btnTransferirEspacio').addEventListener('click', () => {
-    let vacante = Array.isArray(datosIaDetectadosMasivos) ? datosIaDetectadosMasivos[document.getElementById('selectorVacantesDetectadas').value] : datosIaDetectadosMasivos;
-    if (vacante) window.cargarVacanteEnFormulario(vacante);
-  });
-
-  document.getElementById('btnSubirLoteMasivo').addEventListener('click', () => {
-    window.procesarGuardadoLoteConDecision();
-  });
-
+  // Cargar vacante desde Firebase
   document.getElementById('btnCargarVacante').addEventListener('click', () => {
-    const val = document.getElementById('selectorVacantesEnFirebase').value;
-    const vac = listaVacantesGlobal.find(v => v.idFirebase === val);
-    if(vac) window.cargarVacanteEnFormulario(vac);
+    const idUnico = document.getElementById('selectorVacantesEnFirebase').value;
+    const v = listaVacantesGlobal.find(item => item.idFirebase === idUnico);
+    if (v) window.cargarVacanteEnFormulario(v);
   });
 
-  document.getElementById('btnBorrarVacanteWeb').addEventListener('click', () => {
-    const val = document.getElementById('selectorVacantesEnFirebase').value;
-    if(val && confirm("¿Eliminar vacante permanentemente de Firebase?")) {
-      remove(ref(db, `vacantes_detalles/${val}`)).then(() => window.limpiarFormularioVacante());
-    }
-  });
-
-  document.getElementById('btnLimpiarVacanteForm').addEventListener('click', () => window.limpiarFormularioVacante());
-  document.getElementById('buscarPostulanteInput').addEventListener('input', () => window.renderizarTablaPostulantes());
-  
-  document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
-    document.getElementById('panelEdicionPostulante').classList.remove('open');
-  });
-
-  document.getElementById('btnGuardarCambiosPostulante').addEventListener('click', () => {
-    const id = document.getElementById('editPostulanteId').value;
-    if(db && id) {
-      update(ref(db, `postulantes/${id}`), {
-        estatus: document.getElementById('editPostulanteEstatus').value,
-        diaEntrevista: document.getElementById('editPostulanteDia').value,
-        horaCita: document.getElementById('editPostulanteHora').value,
-        reclutadorAsignado: document.getElementById('editPostulanteReclutador').value,
-        notasInternas: document.getElementById('editPostulanteNotas').value
-      }).then(() => {
-        registrarLogSistema("Postulantes", `Expediente actualizado con éxito: ${id}`);
-        document.getElementById('panelEdicionPostulante').classList.remove('open');
-      });
-    }
-  });
-
-  // RECLUTADORES HANDLERS
+  // Reclutadores persistencia
   document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
-    const id = document.getElementById('recIdInput').value.trim().toUpperCase();
-    const nombre = document.getElementById('recNombreInput').value.trim();
-    const tel = document.getElementById('recTelefonoInput').value.trim();
-    const estatus = document.getElementById('recEstatusSelect').value;
-
-    if(!id || !nombre) return alert("Faltan datos");
-    if(db) {
-      set(ref(db, `reclutadores/${id}`), { nombre, telefono: tel, estatus }).then(() => {
-        document.getElementById('recIdInput').value = "";
-        document.getElementById('recNombreInput').value = "";
-        document.getElementById('recTelefonoInput').value = "";
-      });
-    }
+    const id = document.getElementById('recIdInput').value.trim();
+    if(!id) return;
+    const datos = {
+      nombre: document.getElementById('recNombreInput').value.trim(),
+      telefono: document.getElementById('recTelefonoInput').value.trim(),
+      estatus: document.getElementById('recEstatusSelect').value
+    };
+    if(db) set(ref(db, `reclutadores/${id}`), datos).then(() => {
+      document.getElementById('recIdInput').value = "";
+      document.getElementById('recNombreInput').value = "";
+      document.getElementById('recTelefonoInput').value = "";
+    });
   });
 
   document.getElementById('btnActualizarReclutador').addEventListener('click', () => {
     if(db && idReclutadorEdicionActiva) {
-      const nombre = document.getElementById('recNombreInput').value.trim();
-      const tel = document.getElementById('recTelefonoInput').value.trim();
-      const estatus = document.getElementById('recEstatusSelect').value;
-      
-      update(ref(db, `reclutadores/${idReclutadorEdicionActiva}`), { nombre, telefono: tel, estatus }).then(() => {
-        window.cancelarEdicionReclutador();
+      const datos = {
+        nombre: document.getElementById('recNombreInput').value.trim(),
+        telefono: document.getElementById('recTelefonoInput').value.trim(),
+        estatus: document.getElementById('recEstatusSelect').value
+      };
+      update(ref(db, `reclutadores/${idReclutadorEdicionActiva}`), datos).then(() => {
+        idReclutadorEdicionActiva = null;
+        document.getElementById('recIdInput').disabled = false;
+        document.getElementById('recIdInput').value = "";
+        document.getElementById('recNombreInput').value = "";
+        document.getElementById('recTelefonoInput').value = "";
+        document.getElementById('btnGuardarReclutador').style.display = "block";
+        document.getElementById('btnActualizarReclutador').style.display = "none";
+        document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
       });
     }
   });
 
-  document.getElementById('btnCancelarEdicionReclutador').addEventListener('click', window.cancelarEdicionReclutador);
-  document.getElementById('buscarReclutadorInput').addEventListener('input', () => window.renderizarTablaReclutadores());
+  document.getElementById('buscarReclutadorInput').addEventListener('input', window.renderizarTablaReclutadores);
 
-  document.getElementById('archivoIaInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    document.getElementById('nombreArchivoCargado').textContent = file ? file.name : "Ninguno";
+  // Buscador de postulantes
+  document.getElementById('buscarPostulanteInput').addEventListener('input', window.renderizarTablaPostulantes);
+
+  // Cerrar editor rápido postulante
+  document.getElementById('btnCerrarEdicionPostulante').addEventListener('click', () => {
+    document.getElementById('panelEdicionPostulante').classList.remove('open');
   });
 
-  document.getElementById('btnLimpiarLogsPantalla').addEventListener('click', () => {
-    const consola = document.getElementById('consolaSistemaLogs');
-    if (consola) consola.innerHTML = '<div class="log-item"><span class="log-time">[SISTEMA]</span> <span class="log-action" style="color: var(--green-success);">Consola local limpia.</span></div>';
-  });
-
-  // GENERAR RECORDATORIOS DE WHATSAPP (MAÑANA)
-  document.getElementById('btnRecordatoriosMasivos').addEventListener('click', () => {
-    if (listaPostulantesGlobal.length === 0) {
-      alert("No hay postulantes cargados en el sistema.");
-      return;
-    }
-
-    const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-    const hoy = new Date();
-    const mananaIndex = (hoy.getDay() + 1) % 7;
-    const diaMananaStr = diasSemana[mananaIndex];
-
-    const postulantesManana = listaPostulantesGlobal.filter(p => {
-      const diaCita = p.diaEntrevista ? p.diaEntrevista.trim().toLowerCase() : "";
-      return diaCita === diaMananaStr.toLowerCase();
+  // Guardar cambios postulante
+  document.getElementById('btnGuardarCambiosPostulante').addEventListener('click', () => {
+    const id = document.getElementById('editPostulanteId').value;
+    if(!id || !db) return;
+    const data = {
+      estatus: document.getElementById('editPostulanteEstatus').value,
+      diaEntrevista: document.getElementById('editPostulanteDia').value,
+      horaCita: document.getElementById('editPostulanteHora').value,
+      reclutadorAsignado: document.getElementById('editPostulanteReclutador').value,
+      notasInternas: document.getElementById('editPostulanteNotas').value
+    };
+    update(ref(db, `postulantes/${id}`), data).then(() => {
+      document.getElementById('panelEdicionPostulante').classList.remove('open');
+      registrarLogSistema("Postulantes", `Expediente actualizado: ${id}`);
     });
-
-    if (postulantesManana.length === 0) {
-      alert(`No se encontraron postulantes citados para mañana (${diaMananaStr}).`);
-      return;
-    }
-
-    let enviadosCount = 0;
-    postulantesManana.forEach(p => {
-      if (p.telefono) {
-        const numLimpio = p.telefono.replace(/\D/g, "");
-        const horaCitaStr = p.horaCita ? ` a las ${p.horaCita} hrs` : "";
-        const mensaje = `Hola ${p.nombre || "Candidato"}, te recordamos que el día de mañana ${diaMananaStr} tienes agendada tu entrevista para la vacante de ${p.vacanteInteres || "nuestra empresa"}${horaCitaStr}. ¡Te esperamos!`;
-        const urlWa = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
-        
-        window.open(urlWa, '_blank');
-        enviadosCount++;
-      }
-    });
-
-    registrarLogSistema("WhatsApp Recordatorios", `Se intentaron enviar ${enviadosCount} recordatorios para el día ${diaMananaStr}.`);
-  });
-
-  // EXPORTAR A EXCEL MASIVO (SHEETJS)
-  document.getElementById('btnExportarExcelMasivo').addEventListener('click', () => {
-    if (listaPostulantesGlobal.length === 0) {
-      alert("No hay registros que exportar.");
-      return;
-    }
-
-    const datosMapeados = listaPostulantesGlobal.map(p => ({
-      "Nombre Postulante": p.nombre || "—",
-      "Teléfono": p.telefono || "—",
-      "Empresa": p.empresa || p.empresaId || "—",
-      "Vacante de Interés": p.vacanteInteres || "—",
-      "Edad": p.edad || "—",
-      "Género": p.sexo || "—",
-      "Estatus": p.estatus || "Pendiente",
-      "Día de Entrevista": p.diaEntrevista || "—",
-      "Hora de Cita": p.horaCita || "—",
-      "Notas Internas": p.notasInternas || p.notesInternas || "—"
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(datosMapeados);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Postulantes");
-
-    XLSX.writeFile(wb, "BolsaTrabajo_Postulantes_Export.xlsx");
-    registrarLogSistema("Exportación", "Se generó y descargó el reporte masivo de postulantes en formato Excel (.xlsx).");
   });
 });
 </script>

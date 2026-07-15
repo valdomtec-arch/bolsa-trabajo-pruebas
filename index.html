@@ -1766,10 +1766,13 @@ window.eliminarPostulanteSistema = function(id) {
 // RECLUTADORES WORKFLOW
 window.renderizarTablaReclutadores = function() {
   const tbody = document.getElementById('tbodyReclutadores');
+  const buscador = document.getElementById('buscarReclutadorInput').value.toLowerCase().trim();
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  listaReclutadoresGlobal.forEach(rec => {
+  listaReclutadoresGlobal.filter(rec => 
+    rec.idFirebase.toLowerCase().includes(buscador) || (rec.nombre && rec.nombre.toLowerCase().includes(buscador))
+  ).forEach(rec => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${rec.idFirebase}</td>
@@ -1777,11 +1780,43 @@ window.renderizarTablaReclutadores = function() {
       <td>${rec.telefono || '—'}</td>
       <td>${rec.estatus || 'activo'}</td>
       <td>
-        <button class="btn-delete-mode" style="padding:4px 8px;" onclick="window.eliminarReclutador('${rec.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        <div class="actions-layout" style="margin-top:0;">
+          <button class="btn-edit-mode" style="padding:4px 8px;" onclick="window.cargarReclutadorEnEdicion('${rec.idFirebase}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-delete-mode" style="padding:4px 8px;" onclick="window.eliminarReclutador('${rec.idFirebase}')"><i class="fas fa-trash-alt"></i></button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
+};
+
+window.cargarReclutadorEnEdicion = function(idReclutador) {
+  const reclutador = listaReclutadoresGlobal.find(r => r.idFirebase === idReclutador);
+  if (!reclutador) return;
+  idReclutadorEdicionActiva = idReclutador;
+
+  document.getElementById('recIdInput').value = reclutador.idFirebase;
+  document.getElementById('recIdInput').disabled = true;
+  document.getElementById('recNombreInput').value = reclutador.nombre || "";
+  document.getElementById('recTelefonoInput').value = reclutador.telefono || "";
+  document.getElementById('recEstatusSelect').value = reclutador.estatus || "activo";
+
+  document.getElementById('btnGuardarReclutador').style.display = "none";
+  document.getElementById('btnActualizarReclutador').style.display = "block";
+  document.getElementById('btnCancelarEdicionReclutador').style.display = "block";
+};
+
+window.cancelarEdicionReclutador = function() {
+  idReclutadorEdicionActiva = null;
+  document.getElementById('recIdInput').value = "";
+  document.getElementById('recIdInput').disabled = false;
+  document.getElementById('recNombreInput').value = "";
+  document.getElementById('recTelefonoInput').value = "";
+  document.getElementById('recEstatusSelect').value = "activo";
+
+  document.getElementById('btnGuardarReclutador').style.display = "block";
+  document.getElementById('btnActualizarReclutador').style.display = "none";
+  document.getElementById('btnCancelarEdicionReclutador').style.display = "none";
 };
 
 window.actualizarSelectoresReclutadores = function() {
@@ -1798,7 +1833,9 @@ window.actualizarSelectoresReclutadores = function() {
 
 window.eliminarReclutador = function(id) {
   if(confirm("¿Eliminar reclutador?")) {
-    remove(ref(db, `reclutadores/${id}`));
+    remove(ref(db, `reclutadores/${id}`)).then(() => {
+      registrarLogSistema("Reclutadores", `Reclutador eliminado: ${id}`);
+    });
   }
 };
 
@@ -1887,6 +1924,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // RECLUTADORES HANDLERS
   document.getElementById('btnGuardarReclutador').addEventListener('click', () => {
     const id = document.getElementById('recIdInput').value.trim().toUpperCase();
     const nombre = document.getElementById('recNombreInput').value.trim();
@@ -1902,6 +1940,21 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  document.getElementById('btnActualizarReclutador').addEventListener('click', () => {
+    if(db && idReclutadorEdicionActiva) {
+      const nombre = document.getElementById('recNombreInput').value.trim();
+      const tel = document.getElementById('recTelefonoInput').value.trim();
+      const estatus = document.getElementById('recEstatusSelect').value;
+      
+      update(ref(db, `reclutadores/${idReclutadorEdicionActiva}`), { nombre, telefono: tel, estatus }).then(() => {
+        window.cancelarEdicionReclutador();
+      });
+    }
+  });
+
+  document.getElementById('btnCancelarEdicionReclutador').addEventListener('click', window.cancelarEdicionReclutador);
+  document.getElementById('buscarReclutadorInput').addEventListener('input', () => window.renderizarTablaReclutadores());
 
   document.getElementById('archivoIaInput').addEventListener('change', function(e) {
     const file = e.target.files[0];

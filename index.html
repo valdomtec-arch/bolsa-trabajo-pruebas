@@ -981,7 +981,7 @@ pre.json-view { background:#061c15; color:#34d399; border:1px solid var(--green-
     <div class="search-container"><i class="fas fa-search" style="color: var(--text-muted);"></i><input type="text" id="buscarReclutadorInput" placeholder="Buscar..."></div>
     <div style="overflow-x: auto;">
       <table class="empresas-table" id="tablaReclutadores">
-        <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Estatus</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>ID</th><th>Nombre</th><th>CURP</th><th>Teléfono</th><th>Estatus</th><th>Acciones</th></tr></thead>
         <tbody id="tbodyReclutadores"></tbody>
       </table>
     </div>
@@ -2080,8 +2080,9 @@ function renderizarTablaPostulantes() {
       waBtn = `<a href="https://wa.me/${num}?text=${msg}" target="_blank" class="btn-wa-premium" style="font-size:0.75rem;padding:4px 10px;"><i class="fab fa-whatsapp"></i></a>`;
     }
     
-    tr.innerHTML = `
+   tr.innerHTML = `
       <td style="font-weight:bold;">${p.nombre || '-'}</td>
+      <td style="font-family: monospace; font-size: 0.9em;">${p.curp || '-'}</td> <!-- AQUÍ AGREGAMOS LA CURP -->
       <td>${waBtn}</td>
       <td><span style="color:var(--primary-orange);font-weight:500;">${p.empresa || '-'}</span> / ${p.vacanteInteres || '-'}</td>
       <td style="color:#d6d3d1;">${p.edad || '-'} años (${p.sexo || '-'})</td>
